@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #0d0d0d;
+  --foreground: #f0f0f0;
+  --card: #141414;
+  --card-foreground: #f0f0f0;
+  --popover: #141414;
+  --popover-foreground: #f0f0f0;
+  --primary: #9F1239;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #f0f0f0;
+  --muted: #1a1a1a;
+  --muted-foreground: #aaaaaa;
+  --accent: #d4a017;
+  --accent-foreground: #000000;
+  --destructive: #9F1239;
+  --destructive-foreground: #ffffff;
+  --border: #282828;
+  --input: #282828;
+  --ring: #9F1239;
+  --radius: 8px;
+  --radius-lg: 14px;
+  
+  /* Urban Deal specific */
+  --bg: #0d0d0d;
+  --bg2: #141414;
+  --bg3: #1a1a1a;
+  --border2: #333333;
+  --fg: #f0f0f0;
+  --fg2: #aaaaaa;
+  --fg3: #666666;
+  --red: #9F1239;
+  --red-light: #be123c;
+  --red-glow: rgba(159, 18, 57, 0.35);
+  --red-faint: rgba(159, 18, 57, 0.08);
+  --gold: #d4a017;
+}
+
+@theme inline {
+  --font-sans: 'Montserrat', 'Inter', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+@keyframes scrollPulse {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  75% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.6s ease both;
+}
+
+.animate-fadeUp-delay-1 {
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+
+.animate-fadeUp-delay-2 {
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.animate-fadeUp-delay-3 {
+  animation: fadeUp 0.6s 0.35s ease both;
+}
+
+.animate-fadeUp-delay-4 {
+  animation: fadeUp 0.6s 0.45s ease both;
+}
+
+.animate-bounce-scroll {
+  animation: bounce 2.2s ease infinite;
+}
+
+.animate-scroll-dot {
+  animation: scrollPulse 1.7s ease infinite;
+}
