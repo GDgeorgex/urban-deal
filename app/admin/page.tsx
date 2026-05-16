@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Package, Plus, Pencil, Trash2, LogOut, ArrowLeft } from "lucide-react"
+import { Package, Plus, Pencil, Trash2, LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 const ADMIN_PASSWORD = "udeal2025"
@@ -11,62 +10,40 @@ export default function AdminPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState(false)
   const [products, setProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [saveMessage, setSaveMessage] = useState("")
   const [editingProduct, setEditingProduct] = useState<any>(null)
+  const [saveMessage, setSaveMessage] = useState("")
 
   const loadProducts = async () => {
-    setLoading(true)
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .order('id', { ascending: false })
-
-    if (error) {
-      console.error(error)
-      alert("შეცდომა პროდუქტების ჩატვირთვისას: " + error.message)
-    } else {
-      setProducts(data || [])
-    }
-    setLoading(false)
+    
+    if (error) alert("Error loading: " + error.message)
+    else setProducts(data || [])
   }
 
   useEffect(() => {
-    if (isLoggedIn) {
-      loadProducts()
-    }
+    if (isLoggedIn) loadProducts()
   }, [isLoggedIn])
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsLoggedIn(true)
-      setError(false)
     } else {
       setError(true)
     }
   }
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
-    setPassword("")
-    setEditingProduct(null)
-  }
-
-  const showMessage = (msg: string) => {
-    setSaveMessage(msg)
-    setTimeout(() => setSaveMessage(""), 2000)
-  }
-
-  const handleSaveProduct = async (form: any) => {
+  const handleSave = async (form: any) => {
     const productData = {
       name: form.name,
       brand: form.brand,
-      cat: form.cat || "sneakers",
+      cat: "sneakers",
       price: form.price,
       description: form.description || "",
       img: form.img,
-      sizes: form.sizes ? form.sizes.join(",") : "",
-      isPreorder: false,
+      sizes: form.sizes || "",
     }
 
     let result
@@ -79,45 +56,34 @@ export default function AdminPage() {
     if (result.error) {
       alert("შეცდომა: " + result.error.message)
     } else {
-      showMessage("✅ პროდუქტი შენახულია!")
+      setSaveMessage("✅ პროდუქტი შენახულია!")
+      setTimeout(() => setSaveMessage(""), 2000)
       setEditingProduct(null)
       loadProducts()
     }
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm("ნამდვილად გინდა წაშლა?")) return
-    const { error } = await supabase.from('products').delete().eq('id', id)
-    if (error) alert("შეცდომა წაშლისას")
-    else {
-      showMessage("პროდუქტი წაიშალა")
+    if (confirm("წაშლა?")) {
+      await supabase.from('products').delete().eq('id', id)
       loadProducts()
     }
   }
 
-  // Login Screen
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-        <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-12 w-full max-w-md text-center">
-          <div className="bg-red-600 text-white px-6 py-3 rounded-xl inline-block mb-8 font-black text-xl">
-            Urban Deal
-          </div>
-          <h2 className="text-3xl font-black mb-2 text-white">ადმინ პანელი</h2>
-          <p className="text-zinc-400 mb-8">შეიყვანე პაროლი</p>
-          
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 p-12 rounded-3xl text-center">
+          <h1 className="text-red-600 text-5xl font-black mb-8">Urban Deal</h1>
+          <h2 className="text-2xl mb-8">ადმინ პანელი</h2>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             placeholder="პაროლი"
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-6 py-4 text-center text-white text-lg mb-6"
+            className="w-full p-5 bg-zinc-800 rounded-2xl text-white text-center mb-6"
           />
-          <button 
-            onClick={handleLogin}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-semibold text-lg"
-          >
+          <button onClick={handleLogin} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">
             შესვლა
           </button>
           {error && <p className="text-red-500 mt-4">არასწორი პაროლი</p>}
@@ -127,148 +93,46 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      {saveMessage && (
-        <div className="fixed top-6 right-6 bg-green-600 text-white px-8 py-4 rounded-2xl z-50 shadow-2xl">
-          {saveMessage}
-        </div>
-      )}
+    <div className="min-h-screen bg-black text-white p-8">
+      {saveMessage && <div className="fixed top-6 right-6 bg-green-600 px-8 py-4 rounded-2xl z-50">{saveMessage}</div>}
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-72 bg-zinc-900 border-r border-zinc-800 min-h-screen p-6">
-          <div className="mb-12">
-            <div className="bg-red-600 text-white px-5 py-3 rounded-2xl font-black text-2xl inline-block">Urban Deal</div>
-          </div>
-          
-          <div className="space-y-2">
-            <button className="w-full flex items-center gap-4 bg-red-600/10 text-red-500 px-5 py-4 rounded-2xl font-medium">
-              <Package className="w-6 h-6" /> პროდუქტები
-            </button>
-          </div>
-
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-4xl font-black">პროდუქტები</h1>
           <button 
-            onClick={handleLogout}
-            className="absolute bottom-8 left-6 flex items-center gap-3 text-zinc-400 hover:text-white"
+            onClick={() => setEditingProduct({})}
+            className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-medium"
           >
-            <LogOut className="w-5 h-5" /> გამოსვლა
+            <Plus className="w-5 h-5" /> ახალი პროდუქტი
           </button>
-        </aside>
+        </div>
 
-        {/* Main Content */}
-        <main className="flex-1 p-10">
-          <div className="flex justify-between items-center mb-10">
-            <h1 className="text-4xl font-black">პროდუქტები</h1>
-            <button
-              onClick={() => setEditingProduct({})}
-              className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-2xl flex items-center gap-3 font-medium"
-            >
-              <Plus className="w-5 h-5" /> ახალი პროდუქტი
-            </button>
+        {editingProduct !== null && (
+          <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
+            <h2 className="text-2xl mb-6">ახალი პროდუქტი</h2>
+            <input placeholder="სახელი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
+            <input placeholder="ბრენდი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.brand || ""} onChange={e => setEditingProduct({...editingProduct, brand: e.target.value})} />
+            <input placeholder="ფასი (მაგ: ₾ 650)" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.price || ""} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} />
+            <input placeholder="სურათის URL" className="w-full p-4 bg-zinc-800 rounded-2xl mb-6" value={editingProduct.img || ""} onChange={e => setEditingProduct({...editingProduct, img: e.target.value})} />
+            
+            <button onClick={() => handleSave(editingProduct)} className="bg-red-600 px-8 py-3 rounded-2xl mr-4">შენახვა</button>
+            <button onClick={() => setEditingProduct(null)} className="border border-zinc-700 px-8 py-3 rounded-2xl">გაუქმება</button>
           </div>
+        )}
 
-          {editingProduct !== null && (
-            <ProductEditForm 
-              product={editingProduct} 
-              onSave={handleSaveProduct} 
-              onCancel={() => setEditingProduct(null)} 
-            />
-          )}
-
-          <div className="bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-zinc-800">
-                  <th className="text-left p-6">სურათი</th>
-                  <th className="text-left p-6">სახელი</th>
-                  <th className="text-left p-6">ბრენდი</th>
-                  <th className="text-left p-6">ფასი</th>
-                  <th className="text-left p-6">მოქმედება</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((p) => (
-                  <tr key={p.id} className="border-b border-zinc-800 hover:bg-zinc-800/50">
-                    <td className="p-6">
-                      <img src={p.img} alt={p.name} className="w-16 h-16 object-cover rounded-xl" />
-                    </td>
-                    <td className="p-6 font-medium">{p.name}</td>
-                    <td className="p-6 text-zinc-400">{p.brand}</td>
-                    <td className="p-6 font-semibold">{p.price}</td>
-                    <td className="p-6">
-                      <button onClick={() => setEditingProduct(p)} className="text-blue-500 mr-4">
-                        <Pencil className="w-5 h-5" />
-                      </button>
-                      <button onClick={() => handleDelete(p.id)} className="text-red-500">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
-    </div>
-  )
-}
-
-function ProductEditForm({ product, onSave, onCancel }: any) {
-  const [form, setForm] = useState(product || { name: "", brand: "", price: "", img: "" })
-
-  return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-10 mb-10">
-      <h2 className="text-2xl font-bold mb-8">{product?.id ? "პროდუქტის რედაქტირება" : "ახალი პროდუქტი"}</h2>
-      
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block mb-2 text-sm text-zinc-400">სახელი</label>
-          <input 
-            value={form.name || ""} 
-            onChange={(e) => setForm({...form, name: e.target.value})}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-4 text-white"
-          />
+        <div className="space-y-4">
+          {products.map((p) => (
+            <div key={p.id} className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6">
+              <img src={p.img} alt={p.name} className="w-20 h-20 object-cover rounded-2xl" />
+              <div className="flex-1">
+                <div className="text-xl font-bold">{p.name}</div>
+                <div className="text-zinc-400">{p.brand} — {p.price}</div>
+              </div>
+              <button onClick={() => setEditingProduct(p)} className="text-blue-500"><Pencil className="w-6 h-6" /></button>
+              <button onClick={() => handleDelete(p.id)} className="text-red-500"><Trash2 className="w-6 h-6" /></button>
+            </div>
+          ))}
         </div>
-        <div>
-          <label className="block mb-2 text-sm text-zinc-400">ბრენდი</label>
-          <input 
-            value={form.brand || ""} 
-            onChange={(e) => setForm({...form, brand: e.target.value})}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-4 text-white"
-          />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm text-zinc-400">ფასი</label>
-          <input 
-            value={form.price || ""} 
-            onChange={(e) => setForm({...form, price: e.target.value})}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-4 text-white"
-          />
-        </div>
-        <div>
-          <label className="block mb-2 text-sm text-zinc-400">სურათის URL</label>
-          <input 
-            value={form.img || ""} 
-            onChange={(e) => setForm({...form, img: e.target.value})}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-4 text-white"
-          />
-        </div>
-      </div>
-
-      <div className="flex gap-4 mt-10">
-        <button 
-          onClick={() => onSave(form)}
-          className="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-2xl font-semibold"
-        >
-          შენახვა
-        </button>
-        <button 
-          onClick={onCancel}
-          className="border border-zinc-700 hover:bg-zinc-800 px-10 py-4 rounded-2xl"
-        >
-          გაუქმება
-        </button>
       </div>
     </div>
   )
