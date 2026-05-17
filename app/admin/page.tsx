@@ -18,8 +18,8 @@ export default function AdminPage() {
       .from('products')
       .select('*')
       .order('id', { ascending: false })
-    
-    if (error) alert("Error loading: " + error.message)
+
+    if (error) alert("Error loading products: " + error.message)
     else setProducts(data || [])
   }
 
@@ -30,25 +30,36 @@ export default function AdminPage() {
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsLoggedIn(true)
+      setError(false)
     } else {
       setError(true)
     }
   }
 
-  const handleSave = async (form: any) => {
+  const handleSave = async () => {
+    if (!editingProduct?.name || !editingProduct?.brand || !editingProduct?.price) {
+      alert("გთხოვთ შეავსოთ სავალდებულო ველები")
+      return
+    }
+
     const productData = {
-      name: form.name,
-      brand: form.brand,
-      cat: "sneakers",
-      price: form.price,
-      description: form.description || "",
-      img: form.img,
-      sizes: form.sizes || "",
+      name: editingProduct.name,
+      brand: editingProduct.brand,
+      cat: editingProduct.cat || "სნიკერები",
+      price: editingProduct.price,
+      description: editingProduct.description || "",
+      img: editingProduct.img,
+      sizes: editingProduct.sizes || "",
+      isPreorder: editingProduct.isPreorder || false,
+      preorderPrice: editingProduct.preorderPrice || "",
+      regularPrice: editingProduct.regularPrice || "",
+      discountPct: editingProduct.discountPct || 0,
+      expectedArrival: editingProduct.expectedArrival || null,
     }
 
     let result
-    if (form.id) {
-      result = await supabase.from('products').update(productData).eq('id', form.id)
+    if (editingProduct.id) {
+      result = await supabase.from('products').update(productData).eq('id', editingProduct.id)
     } else {
       result = await supabase.from('products').insert(productData)
     }
@@ -56,7 +67,7 @@ export default function AdminPage() {
     if (result.error) {
       alert("შეცდომა: " + result.error.message)
     } else {
-      setSaveMessage("✅ პროდუქტი შენახულია!")
+      setSaveMessage("✅ პროდუქტი წარმატებით შენახულია!")
       setTimeout(() => setSaveMessage(""), 2000)
       setEditingProduct(null)
       loadProducts()
@@ -64,7 +75,7 @@ export default function AdminPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (confirm("წაშლა?")) {
+    if (confirm("ნამდვილად გინდა წაშლა?")) {
       await supabase.from('products').delete().eq('id', id)
       loadProducts()
     }
@@ -82,6 +93,7 @@ export default function AdminPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="პაროლი"
             className="w-full p-5 bg-zinc-800 rounded-2xl text-white text-center mb-6"
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
           />
           <button onClick={handleLogin} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">
             შესვლა
@@ -94,12 +106,14 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
-      {saveMessage && <div className="fixed top-6 right-6 bg-green-600 px-8 py-4 rounded-2xl z-50">{saveMessage}</div>}
+      {saveMessage && (
+        <div className="fixed top-6 right-6 bg-green-600 px-8 py-4 rounded-2xl z-50">{saveMessage}</div>
+      )}
 
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-black">პროდუქტები</h1>
-          <button 
+          <h1 className="text-4xl font-black">პროდუქტების მართვა</h1>
+          <button
             onClick={() => setEditingProduct({})}
             className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-medium"
           >
@@ -107,26 +121,36 @@ export default function AdminPage() {
           </button>
         </div>
 
+        {/* Edit Form */}
         {editingProduct !== null && (
           <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
-            <h2 className="text-2xl mb-6">ახალი პროდუქტი</h2>
-            <input placeholder="სახელი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
-            <input placeholder="ბრენდი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.brand || ""} onChange={e => setEditingProduct({...editingProduct, brand: e.target.value})} />
-            <input placeholder="ფასი (მაგ: ₾ 650)" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.price || ""} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} />
-            <input placeholder="სურათის URL" className="w-full p-4 bg-zinc-800 rounded-2xl mb-6" value={editingProduct.img || ""} onChange={e => setEditingProduct({...editingProduct, img: e.target.value})} />
+            <h2 className="text-2xl mb-6">{editingProduct.id ? "პროდუქტის რედაქტირება" : "ახალი პროდუქტი"}</h2>
             
-            <button onClick={() => handleSave(editingProduct)} className="bg-red-600 px-8 py-3 rounded-2xl mr-4">შენახვა</button>
-            <button onClick={() => setEditingProduct(null)} className="border border-zinc-700 px-8 py-3 rounded-2xl">გაუქმება</button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input placeholder="სახელი *" className="p-4 bg-zinc-800 rounded-2xl" value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
+              <input placeholder="ბრენდი *" className="p-4 bg-zinc-800 rounded-2xl" value={editingProduct.brand || ""} onChange={e => setEditingProduct({...editingProduct, brand: e.target.value})} />
+              <input placeholder="ფასი (მაგ: ₾ 650) *" className="p-4 bg-zinc-800 rounded-2xl" value={editingProduct.price || ""} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} />
+              <input placeholder="სურათის URL" className="p-4 bg-zinc-800 rounded-2xl" value={editingProduct.img || ""} onChange={e => setEditingProduct({...editingProduct, img: e.target.value})} />
+              <textarea placeholder="აღწერა" className="p-4 bg-zinc-800 rounded-2xl md:col-span-2 h-24" value={editingProduct.description || ""} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} />
+              <input placeholder="ზომები (40,41,42)" className="p-4 bg-zinc-800 rounded-2xl" value={editingProduct.sizes || ""} onChange={e => setEditingProduct({...editingProduct, sizes: e.target.value})} />
+            </div>
+
+            <div className="flex gap-4 mt-6">
+              <button onClick={handleSave} className="bg-red-600 px-8 py-3 rounded-2xl">შენახვა</button>
+              <button onClick={() => setEditingProduct(null)} className="border border-zinc-700 px-8 py-3 rounded-2xl">გაუქმება</button>
+            </div>
           </div>
         )}
 
+        {/* Products List */}
         <div className="space-y-4">
           {products.map((p) => (
             <div key={p.id} className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6">
-              <img src={p.img} alt={p.name} className="w-20 h-20 object-cover rounded-2xl" />
+              {p.img && <img src={p.img} alt={p.name} className="w-20 h-20 object-cover rounded-2xl" />}
               <div className="flex-1">
                 <div className="text-xl font-bold">{p.name}</div>
                 <div className="text-zinc-400">{p.brand} — {p.price}</div>
+                {p.description && <div className="text-sm text-zinc-500 mt-1 line-clamp-2">{p.description}</div>}
               </div>
               <button onClick={() => setEditingProduct(p)} className="text-blue-500"><Pencil className="w-6 h-6" /></button>
               <button onClick={() => handleDelete(p.id)} className="text-red-500"><Trash2 className="w-6 h-6" /></button>
