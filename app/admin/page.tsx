@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import {
-  LayoutDashboard, Package, Flame, Home, Image, Tag, Settings, LogOut, Plus, Pencil, Trash2
+  Package, Flame, Plus, Pencil, Trash2, LogOut
 } from "lucide-react"
 
 const ADMIN_PASSWORD = "udeal2025"
@@ -30,9 +30,26 @@ export default function AdminPage() {
   }, [isLoggedIn])
 
   const saveProduct = async (product: any) => {
-    const { error } = await supabase.from('products').upsert(product)
-    if (error) alert("Error: " + error.message)
-    else {
+    const productData = {
+      name: product.name,
+      brand: product.brand,
+      cat: product.cat || "sneakers",
+      price: product.price,
+      description: product.description || "",
+      img: product.img,
+      sizes: product.sizes || "",
+      isPreorder: product.isPreorder || false,
+      preorderPrice: product.preorderPrice || null,
+      regularPrice: product.regularPrice || null,
+      expected_arrival: product.expectedArrival || product.expected_arrival || null,   // fixed
+    }
+
+    const { error } = await supabase.from('products').upsert(productData)
+
+    if (error) {
+      alert("შეცდომა: " + error.message)
+      console.error(error)
+    } else {
       showMessage("✅ შენახულია!")
       loadProducts()
     }
@@ -72,7 +89,6 @@ export default function AdminPage() {
     <div className="min-h-screen bg-zinc-950 text-white flex">
       {saveMessage && <div className="fixed top-6 right-6 bg-green-600 px-8 py-4 rounded-2xl z-50">{saveMessage}</div>}
 
-      {/* Sidebar */}
       <aside className="w-72 bg-zinc-900 border-r border-zinc-800 p-6 flex flex-col">
         <div className="mb-12">
           <div className="bg-red-600 text-white px-6 py-4 rounded-2xl font-black text-2xl inline-block">Urban Deal</div>
@@ -92,7 +108,6 @@ export default function AdminPage() {
         </button>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-10">
         {activeTab === "products" && <ProductsPanel products={products} onSave={saveProduct} onDelete={deleteProduct} />}
         {activeTab === "preorders" && <PreordersPanel products={products} onSave={saveProduct} onDelete={deleteProduct} />}
@@ -101,22 +116,19 @@ export default function AdminPage() {
   )
 }
 
-/* ==================== PRODUCTS PANEL ==================== */
+// Keep the same ProductForm and ProductCard from before (shortened for now)
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
-
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between mb-8">
         <h1 className="text-4xl font-black">პროდუქტები</h1>
         <button onClick={() => setEditing({})} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
           <Plus /> ახალი პროდუქტი
         </button>
       </div>
-
-      {editing !== null && <ProductForm product={editing} onSave={(p) => {onSave(p); setEditing(null)}} onCancel={() => setEditing(null)} />}
-
-      <div className="grid gap-6">
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} />}
+      <div className="space-y-4">
         {products.filter((p: any) => !p.isPreorder).map((p: any) => (
           <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
         ))}
@@ -125,22 +137,18 @@ function ProductsPanel({ products, onSave, onDelete }: any) {
   )
 }
 
-/* ==================== PRE-ORDERS PANEL ==================== */
 function PreordersPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
-
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between mb-8">
         <h1 className="text-4xl font-black flex items-center gap-3"><Flame className="text-orange-500" /> პრი-ორდერები</h1>
         <button onClick={() => setEditing({ isPreorder: true })} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
           <Plus /> ახალი პრი-ორდერი
         </button>
       </div>
-
-      {editing !== null && <ProductForm product={editing} onSave={(p) => {onSave(p); setEditing(null)}} onCancel={() => setEditing(null)} isPreorder />}
-
-      <div className="grid gap-6">
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder />}
+      <div className="space-y-4">
         {products.filter((p: any) => p.isPreorder).map((p: any) => (
           <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
         ))}
@@ -149,31 +157,26 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
   )
 }
 
-/* ==================== COMMON COMPONENTS ==================== */
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
   const [form, setForm] = useState(product || {})
-
   return (
     <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
-      <h2 className="text-2xl font-bold mb-6">{product?.id ? "რედაქტირება" : isPreorder ? "ახალი პრი-ორდერი" : "ახალი პროდუქტი"}</h2>
-      
+      <h2 className="text-2xl font-bold mb-6">{isPreorder ? "ახალი პრი-ორდერი" : "ახალი პროდუქტი"}</h2>
       <div className="grid grid-cols-2 gap-6">
         <input placeholder="სახელი" value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        
         {isPreorder && (
           <>
             <input placeholder="პრი-ორდერ ფასი" value={form.preorderPrice || ""} onChange={e => setForm({...form, preorderPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
             <input placeholder="ჩვეულებრივი ფასი" value={form.regularPrice || ""} onChange={e => setForm({...form, regularPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-            <input placeholder="მოსალოდნელი ჩამოსვლა" value={form.expectedArrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+            <input placeholder="მოსალოდნელი ჩამოსვლა (მაგ: მაისი 2025)" value={form.expectedArrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl col-span-2" />
           </>
         )}
       </div>
-
       <div className="flex gap-4 mt-8">
-        <button onClick={() => onSave({...form, isPreorder: isPreorder})} className="bg-red-600 px-8 py-4 rounded-2xl">შენახვა</button>
+        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl">შენახვა</button>
         <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
       </div>
     </div>
@@ -182,12 +185,12 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
 
 function ProductCard({ product, onEdit, onDelete }: any) {
   return (
-    <div className="bg-zinc-900 p-6 rounded-3xl flex gap-6 items-center">
-      <img src={product.img} alt={product.name} className="w-24 h-24 object-cover rounded-2xl" />
+    <div className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6">
+      <img src={product.img} className="w-24 h-24 object-cover rounded-2xl" />
       <div className="flex-1">
         <h3 className="text-xl font-bold">{product.name}</h3>
         <p className="text-red-500">{product.brand} — {product.price}</p>
-        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expectedArrival}</p>}
+        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expected_arrival || product.expectedArrival}</p>}
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
       <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
