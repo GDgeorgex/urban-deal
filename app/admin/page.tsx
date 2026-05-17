@@ -64,19 +64,8 @@ export default function AdminPage() {
         <div className="bg-zinc-900 p-12 rounded-3xl w-full max-w-md text-center">
           <h1 className="text-red-600 text-5xl font-black mb-8">Urban Deal</h1>
           <h2 className="text-3xl mb-8">ადმინ პანელი</h2>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            placeholder="პაროლი" 
-            className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" 
-          />
-          <button 
-            onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} 
-            className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold"
-          >
-            შესვლა
-          </button>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="პაროლი" className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" />
+          <button onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">შესვლა</button>
           {error && <p className="text-red-500 mt-4">არასწორი პაროლი</p>}
         </div>
       </div>
@@ -165,29 +154,25 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         
         <div>
           <label className="block text-sm mb-2">კატეგორია</label>
-          <input placeholder="sneakers, hoodies, accessories..." value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          <input placeholder="sneakers, accessories..." value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
         </div>
-        
+
         <div>
           <label className="block text-sm mb-2">სქესი</label>
-          <select value={form.gender || "unisex"} onChange={e => setForm({...form, gender: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full">
-            <option value="men">მამაკაცი (Men)</option>
-            <option value="women">ქალი (Women)</option>
+          <select 
+            value={form.gender || "unisex"} 
+            onChange={e => setForm({...form, gender: e.target.value})} 
+            className="bg-zinc-800 p-4 rounded-2xl w-full"
+          >
+            <option value="men">მამაკაცი</option>
+            <option value="women">ქალი</option>
             <option value="unisex">Unisex</option>
-            <option value="kids">ბავშვები (Kids)</option>
+            <option value="kids">ბავშვები</option>
           </select>
         </div>
 
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        
-        {isPreorder && (
-          <>
-            <input placeholder="პრი-ორდერ ფასი" value={form.preorderPrice || ""} onChange={e => setForm({...form, preorderPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-            <input placeholder="ჩვეულებრივი ფასი" value={form.regularPrice || ""} onChange={e => setForm({...form, regularPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-            <input placeholder="მოსალოდნელი ჩამოსვლა" value={form.expectedArrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl col-span-2" />
-          </>
-        )}
       </div>
 
       <div className="flex gap-4 mt-8">
@@ -205,8 +190,7 @@ function ProductCard({ product, onEdit, onDelete }: any) {
       <div className="flex-1">
         <h3 className="text-xl font-bold">{product.name}</h3>
         <p className="text-red-500">{product.brand} — {product.price}</p>
-        <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • {product.gender}</p>
-        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი</p>}
+        <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • სქესი: {product.gender}</p>
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
       <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
