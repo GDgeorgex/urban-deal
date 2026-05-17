@@ -1,130 +1,88 @@
-import Image from "next/image"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { ProductCard } from "@/components/product-card"
-import { PRODUCTS } from "@/lib/products"
+"use client"
+import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabase"
 
 export default function PreorderPage() {
-  const preorderProducts = PRODUCTS.filter((p) => p.isPreorder)
+  const [preorders, setPreorders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const reasons = [
-    {
-      icon: "💰",
-      title: "20% ფასდაკლება",
-      desc: "პრი-ორდერ ფასი ყოველთვის 20% ნაკლებია საბოლოო ფასზე. შენახე ფული.",
-    },
-    {
-      icon: "✅",
-      title: "100% ორიგინალი",
-      desc: "ყველა სნიკერი პირდაპირ ევროპული ოფიციალური დილერებიდან — ყალბი გამორიცხულია.",
-    },
-    {
-      icon: "🚀",
-      title: "პრიორიტეტული მიტანა",
-      desc: "პრი-ორდერ კლიენტები პირველები იღებენ შეკვეთას, როგორც კი ნივთი ჩამოვა.",
-    },
-    {
-      icon: "🛡️",
-      title: "რისკი — ნული",
-      desc: "თუ ნივთი დაგვიანდა 30 დღეზე მეტით — ვაბრუნებთ სრულ თანხას.",
-    },
-  ]
+  useEffect(() => {
+    async function fetchPreorders() {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('isPreorder', true)        // important: boolean true
+        .order('id', { ascending: false })
+
+      if (error) {
+        console.error("Preorder fetch error:", error)
+      } else {
+        setPreorders(data || [])
+      }
+      setLoading(false)
+    }
+
+    fetchPreorders()
+  }, [])
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-3xl">იწვირთება პრი-ორდერები...</div>
+  }
 
   return (
-    <>
-      <Navbar />
-      <main>
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-[#1a0008] to-background py-20 pb-16 border-b border-border relative overflow-hidden">
-          <div className="absolute right-[-40px] top-10 font-black text-[180px] tracking-[-0.05em] text-[rgba(159,18,57,0.05)] pointer-events-none whitespace-nowrap leading-none hidden lg:block">
-            PRE-ORDER
-          </div>
-
-          <div className="max-w-[1300px] mx-auto px-7 relative">
-            <div className="inline-flex items-center gap-2 bg-primary text-white px-5 py-1.5 rounded-full text-[11px] font-bold tracking-[0.25em] mb-6 shadow-[0_0_24px_var(--red-glow)]">
-              PRE-ORDER
-            </div>
-
-            <h1 className="font-black text-[clamp(44px,7vw,92px)] tracking-[-0.03em] leading-[0.9] text-white mb-4">
-              დაჯავშნე
-              <br />
-              <span className="text-primary">20%-ით</span> იაფად
-            </h1>
-
-            <p className="text-lg font-light text-white/75 max-w-[600px] mb-10 leading-relaxed">
-              დაბლოკე შენი სასურველი სნიკერი ახლავე. ჩვენ შეუკვეთავთ შენთვის ევროპიდან — გარანტირებულად ორიგინალი,
-              პრიორიტეტული მიტანით, ბოლო ფასად.
-            </p>
-
-            {/* Reasons Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-              {reasons.map((reason, i) => (
-                <div
-                  key={i}
-                  className="bg-white/5 border border-[rgba(159,18,57,0.2)] rounded-[14px] p-5 text-center"
-                >
-                  <div className="text-3xl mb-3">{reason.icon}</div>
-                  <h4 className="font-extrabold text-sm mb-1.5">{reason.title}</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{reason.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3.5 flex-wrap">
-              <a
-                href="#products"
-                className="inline-flex items-center justify-center gap-2 px-9 py-4 rounded-lg bg-primary text-white font-bold text-sm tracking-[0.06em] shadow-[0_4px_18px_var(--red-glow)] hover:bg-[var(--red-light)] transition-all hover:-translate-y-0.5"
-              >
-                ნახე პრი-ორდერ პროდუქტები ↓
-              </a>
-              <a
-                href="https://wa.me/995592013611?text=გამარჯობა!%20პრი-ორდერი%20მინდა%20განვიხილო."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-9 py-4 rounded-lg bg-transparent text-white font-bold text-sm tracking-[0.06em] border-[1.5px] border-[var(--border2)] hover:border-primary hover:text-primary transition-all hover:-translate-y-0.5"
-              >
-                WhatsApp-ით კონსულტაცია
-              </a>
-            </div>
-          </div>
+    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h1 className="text-6xl font-black text-orange-500 mb-4">პრი-ორდერი</h1>
+          <p className="text-2xl text-zinc-400">დაჯავშნე მომავალი კოლექცია ახლავე</p>
         </div>
 
-        {/* Products Section */}
-        <section id="products" className="py-14 pb-20">
-          <div className="max-w-[1300px] mx-auto px-7">
-            <div className="text-[11px] font-bold tracking-[0.3em] uppercase text-primary mb-3">
-              პრი-ორდერ კატალოგი
-            </div>
-            <h2 className="font-black text-[clamp(40px,5vw,72px)] leading-[0.95] tracking-[-0.02em] text-foreground mb-9">
-              ახლავე <span className="text-muted-foreground">დაჯავშნე</span>
-            </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {preorders.map((product) => (
+            <div key={product.id} className="bg-zinc-900 rounded-3xl overflow-hidden border border-orange-500/30 group">
+              <div className="relative h-96">
+                <img 
+                  src={product.img} 
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+                <div className="absolute top-6 right-6 bg-orange-500 text-black font-bold px-6 py-2 rounded-full text-sm">
+                  PRE-ORDER
+                </div>
+              </div>
 
-            {preorderProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {preorderProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} isPreorderPage />
-                ))}
+              <div className="p-8">
+                <p className="text-orange-500 font-medium mb-1">{product.brand}</p>
+                <h3 className="text-2xl font-bold mb-4">{product.name}</h3>
+                
+                <div className="flex justify-between items-baseline mb-8">
+                  <div>
+                    <p className="text-sm text-zinc-400">პრი-ორდერ ფასი</p>
+                    <p className="text-4xl font-black text-orange-500">{product.preorderPrice}</p>
+                  </div>
+                  {product.regularPrice && (
+                    <p className="line-through text-zinc-500">{product.regularPrice}</p>
+                  )}
+                </div>
+
+                {product.expected_arrival && (
+                  <p className="text-zinc-400 mb-8">ჩამოსვლა: {product.expected_arrival}</p>
+                )}
+
+                <button className="w-full bg-orange-500 hover:bg-orange-600 text-black font-bold py-5 rounded-2xl text-lg transition">
+                  დაჯავშნა პრი-ორდერით
+                </button>
               </div>
-            ) : (
-              <div className="text-center py-16 text-muted-foreground">
-                <p className="text-lg mb-4">ამჟამად პრი-ორდერ პროდუქტები არ არის.</p>
-                <p>
-                  მალე დაემატება —{" "}
-                  <a
-                    href="https://instagram.com/urbandeal_"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    გამოგვყევი Instagram-ზე
-                  </a>
-                </p>
-              </div>
-            )}
+            </div>
+          ))}
+        </div>
+
+        {preorders.length === 0 && (
+          <div className="text-center py-32 text-3xl text-zinc-500">
+            ჯერჯერობით პრი-ორდერები არ არის დამატებული
           </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+        )}
+      </div>
+    </div>
   )
 }
