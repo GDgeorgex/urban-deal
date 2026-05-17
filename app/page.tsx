@@ -4,17 +4,17 @@ import Link from "next/link"
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* HERO SECTION */}
+      {/* HERO SECTION - Rich Design */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542291026-7eec264c27ff')] bg-cover bg-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black z-10" />
 
-        <div className="relative z-10 text-center px-6 max-w-5xl">
-          <div className="inline-flex items-center gap-3 bg-red-600 text-white text-sm font-bold tracking-[3px] px-8 py-3 rounded-full mb-6">
+        <div className="relative z-20 text-center px-6 max-w-5xl">
+          <div className="inline-block bg-red-600 text-white text-sm font-bold tracking-widest px-8 py-3 rounded-full mb-8">
             🔥 ახალი კოლექცია 2025
           </div>
 
-          <h1 className="text-7xl md:text-8xl font-black tracking-tighter leading-none mb-6">
+          <h1 className="text-7xl md:text-[110px] font-black tracking-[-4px] leading-none mb-6">
             URBAN<br />DEAL
           </h1>
 
