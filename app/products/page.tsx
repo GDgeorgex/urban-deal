@@ -1,106 +1,148 @@
 "use client"
-import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
-import { ShoppingCart } from "lucide-react"
+
+import { useState, useMemo } from "react"
+import { Search } from "lucide-react"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
+import { ProductCard } from "@/components/product-card"
+import { PRODUCTS } from "@/lib/products"
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCat, setSelectedCat] = useState("all")
-  const [selectedBrand, setSelectedBrand] = useState("all")
+  const [search, setSearch] = useState("")
+  const [selectedBrand, setSelectedBrand] = useState("ყველა ბრენდი")
+  const [selectedCat, setSelectedCat] = useState("ყველა კატეგ.")
 
-  useEffect(() => {
-    async function fetchProducts() {
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .order('id', { ascending: false })
-      
-      setProducts(data || [])
-      setLoading(false)
-    }
-    fetchProducts()
+  const regularProducts = PRODUCTS.filter((p) => !p.isPreorder)
+
+  const brands = useMemo(() => {
+    return ["ყველა ბრენდი", ...new Set(regularProducts.map((p) => p.brand))]
   }, [])
 
-  const categories = ["all", ...new Set(products.map(p => p.cat).filter(Boolean))]
-  const brands = ["all", ...new Set(products.map(p => p.brand).filter(Boolean))]
+  const categories = useMemo(() => {
+    return ["ყველა კატეგ.", ...new Set(regularProducts.map((p) => p.cat))]
+  }, [])
 
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         p.brand?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCat = selectedCat === "all" || p.cat === selectedCat
-    const matchesBrand = selectedBrand === "all" || p.brand === selectedBrand
-    return matchesSearch && matchesCat && matchesBrand
-  })
+  const filteredProducts = useMemo(() => {
+    return regularProducts.filter((p) => {
+      const matchesBrand = selectedBrand === "ყველა ბრენდი" || p.brand === selectedBrand
+      const matchesCat = selectedCat === "ყველა კატეგ." || p.cat === selectedCat
+      const matchesSearch =
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.brand.toLowerCase().includes(search.toLowerCase())
+      return matchesBrand && matchesCat && matchesSearch
+    })
+  }, [search, selectedBrand, selectedCat])
 
-  const addToCart = (product: any) => {
-    alert(`${product.name} დაემატა კალათში ✓`)
-    // Later we will make real cart
+  const clearFilters = () => {
+    setSearch("")
+    setSelectedBrand("ყველა ბრენდი")
+    setSelectedCat("ყველა კატეგ.")
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-3xl">იწვირთება...</div>
-
   return (
-    <div className="min-h-screen bg-black text-white pt-20">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Hero Title - like old version */}
-        <div className="text-center mb-12">
-          <h1 className="text-7xl font-black tracking-tighter text-red-500 neon-text">პროდუქტები</h1>
-          <p className="text-xl text-zinc-400 mt-3">6 პროდუქტი სულ მონაცემთა ბაზაში</p>
+    <>
+      <Navbar />
+      <main>
+        {/* Page Hero */}
+        <div className="bg-card border-b border-border py-14 pb-9">
+          <div className="max-w-[1300px] mx-auto px-7">
+            <h1 className="font-black text-[clamp(44px,7vw,88px)] tracking-[-0.03em] leading-[0.9] text-foreground">
+              ჩვენი <span className="text-primary">კოლექცია</span>
+            </h1>
+            <p className="text-muted-foreground text-[15px] mt-3">
+              ავთენტური სნიკერები და სტრიტვეარი — ევროპიდან, პირდაპირ თბილისში.
+            </p>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-10 justify-center">
-          <input
-            type="text"
-            placeholder="ძებნა სახელით ან ბრენდით..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-zinc-900 border border-zinc-700 px-6 py-4 rounded-2xl w-full max-w-md focus:border-red-600"
-          />
+        <div className="bg-card border-b border-border py-5 sticky top-[62px] z-[100]">
+          <div className="max-w-[1300px] mx-auto px-7 flex flex-col gap-3.5">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--fg3)] w-4 h-4 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="მოძებნე პროდუქტი..."
+                className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground text-sm outline-none transition-colors focus:border-primary placeholder:text-[var(--fg3)]"
+              />
+            </div>
 
-          <select value={selectedCat} onChange={(e) => setSelectedCat(e.target.value)} className="bg-zinc-900 border border-zinc-700 px-6 py-4 rounded-2xl">
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat === "all" ? "ყველა კატეგორია" : cat}</option>
-            ))}
-          </select>
+            <div className="flex gap-6 flex-wrap">
+              <div>
+                <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--fg3)] mb-1.5">
+                  ბრენდი
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {brands.map((brand) => (
+                    <button
+                      key={brand}
+                      onClick={() => setSelectedBrand(brand)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold border-[1.5px] transition-all cursor-pointer ${
+                        selectedBrand === brand
+                          ? "bg-primary border-primary text-white"
+                          : "bg-transparent border-border text-muted-foreground hover:border-primary hover:text-foreground"
+                      }`}
+                    >
+                      {brand}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className="bg-zinc-900 border border-zinc-700 px-6 py-4 rounded-2xl">
-            {brands.map(b => (
-              <option key={b} value={b}>{b === "all" ? "ყველა ბრენდი" : b}</option>
-            ))}
-          </select>
+              <div>
+                <label className="block text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--fg3)] mb-1.5">
+                  კატეგორია
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCat(cat)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold border-[1.5px] transition-all cursor-pointer ${
+                        selectedCat === cat
+                          ? "bg-primary border-primary text-white"
+                          : "bg-transparent border-border text-muted-foreground hover:border-primary hover:text-foreground"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-600 group">
-              <div className="relative h-80">
-                <img 
-                  src={product.img} 
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-6">
-                <p className="text-red-500 font-medium">{product.brand}</p>
-                <h3 className="text-xl font-bold mt-1 mb-3 line-clamp-2">{product.name}</h3>
-                <p className="text-3xl font-black mb-6">{product.price}</p>
+        <section className="py-10 pb-20">
+          <div className="max-w-[1300px] mx-auto px-7">
+            <p className="text-[var(--fg3)] text-[13px] mb-6">
+              ნაჩვენებია {filteredProducts.length} პროდუქტი
+            </p>
 
-                <button 
-                  onClick={() => addToCart(product)}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-semibold hover:bg-zinc-100 flex items-center justify-center gap-2 transition"
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg mb-5">ამ ფილტრებით პროდუქტი ვერ მოიძებნა.</p>
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-lg bg-transparent text-foreground font-bold text-[13px] tracking-[0.06em] border-[1.5px] border-[var(--border2)] hover:border-primary hover:text-primary transition-all"
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  კალათში დამატება
+                  ფილტრის გასუფთავება
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+            )}
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
   )
 }

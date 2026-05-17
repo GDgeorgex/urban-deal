@@ -3,14 +3,14 @@ import { Montserrat, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AdminFloatButton } from '@/components/admin-float-button'
 import './globals.css'
-import { supabase } from '@/lib/supabase'   // ← Added
 
-const montserrat = Montserrat({
+const montserrat = Montserrat({ 
   subsets: ['latin', 'cyrillic-ext'],
   variable: '--font-montserrat',
   display: 'swap',
 })
-const inter = Inter({
+
+const inter = Inter({ 
   subsets: ['latin', 'cyrillic-ext'],
   variable: '--font-inter',
   display: 'swap',
@@ -18,7 +18,14 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Urban Deal – პრემიუმ სნიკერები & სტრიტვეარი',
-  description: 'ევროპული სნიკერები — პირდაპირ თბილისში. ორიგინალი. პრემიუმ. შენთვის.',
+  description: 'ევროპული სნიკერები — პირდაპირ თბილისში. ორიგინალი. პრემიუმ. შენთვის. Nike, Adidas, Jordan, New Balance და სხვა.',
+  keywords: ['sneakers', 'streetwear', 'Nike', 'Adidas', 'Jordan', 'თბილისი', 'საქართველო', 'სნიკერები'],
+  icons: {
+    icon: [
+      { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
+      { url: '/icon-dark-32x32.png', media: '(prefers-color-scheme: dark)' },
+    ],
+  },
 }
 
 export const viewport: Viewport = {
