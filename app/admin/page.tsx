@@ -64,8 +64,19 @@ export default function AdminPage() {
         <div className="bg-zinc-900 p-12 rounded-3xl w-full max-w-md text-center">
           <h1 className="text-red-600 text-5xl font-black mb-8">Urban Deal</h1>
           <h2 className="text-3xl mb-8">ადმინ პანელი</h2>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="პაროლი" className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" />
-          <button onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">შესვლა</button>
+          <input 
+            type="password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            placeholder="პაროლი" 
+            className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" 
+          />
+          <button 
+            onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} 
+            className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold"
+          >
+            შესვლა
+          </button>
           {error && <p className="text-red-500 mt-4">არასწორი პაროლი</p>}
         </div>
       </div>
@@ -100,8 +111,6 @@ export default function AdminPage() {
     </div>
   )
 }
-
-// ... (ProductsPanel, PreordersPanel, ProductForm, ProductCard remain the same as previous version)
 
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
@@ -160,7 +169,7 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         </div>
         
         <div>
-          <label className="block text-sm mb-2">სქესი / Gender</label>
+          <label className="block text-sm mb-2">სქესი</label>
           <select value={form.gender || "unisex"} onChange={e => setForm({...form, gender: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full">
             <option value="men">მამაკაცი (Men)</option>
             <option value="women">ქალი (Women)</option>
@@ -197,7 +206,7 @@ function ProductCard({ product, onEdit, onDelete }: any) {
         <h3 className="text-xl font-bold">{product.name}</h3>
         <p className="text-red-500">{product.brand} — {product.price}</p>
         <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • {product.gender}</p>
-        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expected_arrival}</p>}
+        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი</p>}
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
       <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
