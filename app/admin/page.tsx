@@ -34,7 +34,6 @@ export default function AdminPage() {
       cat: product.cat || "sneakers",
       gender: product.gender || "unisex",
       price: product.price,
-      description: product.description || "",
       img: product.img,
       sizes: product.sizes || "",
       isPreorder: product.isPreorder || false,
@@ -101,6 +100,60 @@ export default function AdminPage() {
   )
 }
 
+// ProductForm with Gender
+function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
+  const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
+
+  return (
+    <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
+      <h2 className="text-2xl font-bold mb-6">{isPreorder ? "ახალი პრი-ორდერი" : "ახალი პროდუქტი"}</h2>
+      
+      <div className="grid grid-cols-2 gap-6">
+        <input placeholder="სახელი" value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        
+        <div>
+          <label className="block text-sm mb-2">კატეგორია</label>
+          <input placeholder="sneakers, hoodies..." value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-2">სქესი</label>
+          <select value={form.gender || "unisex"} onChange={e => setForm({...form, gender: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full">
+            <option value="men">მამაკაცი</option>
+            <option value="women">ქალი</option>
+            <option value="unisex">Unisex</option>
+            <option value="kids">ბავშვები</option>
+          </select>
+        </div>
+
+        <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+      </div>
+
+      <div className="flex gap-4 mt-8">
+        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold">შენახვა</button>
+        <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
+      </div>
+    </div>
+  )
+}
+
+function ProductCard({ product, onEdit, onDelete }: any) {
+  return (
+    <div className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6 hover:bg-zinc-800 transition">
+      <img src={product.img} className="w-24 h-24 object-cover rounded-2xl" />
+      <div className="flex-1">
+        <h3 className="text-xl font-bold">{product.name}</h3>
+        <p className="text-red-500">{product.brand} — {product.price}</p>
+        <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • სქესი: {product.gender}</p>
+      </div>
+      <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
+      <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
+    </div>
+  )
+}
+
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
@@ -137,63 +190,6 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
           <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
         ))}
       </div>
-    </div>
-  )
-}
-
-function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
-  const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
-
-  return (
-    <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
-      <h2 className="text-2xl font-bold mb-6">{isPreorder ? "ახალი პრი-ორდერი" : "ახალი პროდუქტი"}</h2>
-      
-      <div className="grid grid-cols-2 gap-6">
-        <input placeholder="სახელი" value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        
-        <div>
-          <label className="block text-sm mb-2">კატეგორია</label>
-          <input placeholder="sneakers, accessories..." value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-2">სქესი</label>
-          <select 
-            value={form.gender || "unisex"} 
-            onChange={e => setForm({...form, gender: e.target.value})} 
-            className="bg-zinc-800 p-4 rounded-2xl w-full"
-          >
-            <option value="men">მამაკაცი</option>
-            <option value="women">ქალი</option>
-            <option value="unisex">Unisex</option>
-            <option value="kids">ბავშვები</option>
-          </select>
-        </div>
-
-        <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold">შენახვა</button>
-        <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
-      </div>
-    </div>
-  )
-}
-
-function ProductCard({ product, onEdit, onDelete }: any) {
-  return (
-    <div className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6 hover:bg-zinc-800 transition">
-      <img src={product.img} className="w-24 h-24 object-cover rounded-2xl" />
-      <div className="flex-1">
-        <h3 className="text-xl font-bold">{product.name}</h3>
-        <p className="text-red-500">{product.brand} — {product.price}</p>
-        <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • სქესი: {product.gender}</p>
-      </div>
-      <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
-      <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
     </div>
   )
 }
