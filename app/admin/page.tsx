@@ -1,9 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import {
-  Package, Flame, Plus, Pencil, Trash2, LogOut
-} from "lucide-react"
+import { Package, Flame, Plus, Pencil, Trash2, LogOut } from "lucide-react"
 
 const ADMIN_PASSWORD = "udeal2025"
 
@@ -41,15 +39,12 @@ export default function AdminPage() {
       isPreorder: product.isPreorder || false,
       preorderPrice: product.preorderPrice || null,
       regularPrice: product.regularPrice || null,
-      expected_arrival: product.expectedArrival || product.expected_arrival || null,   // fixed
+      expected_arrival: product.expectedArrival || product.expected_arrival || null,
     }
 
     const { error } = await supabase.from('products').upsert(productData)
-
-    if (error) {
-      alert("შეცდომა: " + error.message)
-      console.error(error)
-    } else {
+    if (error) alert("შეცდომა: " + error.message)
+    else {
       showMessage("✅ შენახულია!")
       loadProducts()
     }
@@ -63,22 +58,14 @@ export default function AdminPage() {
   }
 
   if (!isLoggedIn) {
+    // Login screen (same as before)
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="bg-zinc-900 p-12 rounded-3xl w-full max-w-md text-center">
           <h1 className="text-red-600 text-5xl font-black mb-8">Urban Deal</h1>
           <h2 className="text-3xl mb-8">ადმინ პანელი</h2>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            placeholder="პაროლი" 
-            className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" 
-          />
-          <button onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} 
-                  className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">
-            შესვლა
-          </button>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="პაროლი" className="w-full p-5 bg-zinc-800 rounded-2xl mb-6 text-center text-xl" />
+          <button onClick={() => password === ADMIN_PASSWORD ? setIsLoggedIn(true) : setError(true)} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">შესვლა</button>
           {error && <p className="text-red-500 mt-4">არასწორი პაროლი</p>}
         </div>
       </div>
@@ -93,7 +80,6 @@ export default function AdminPage() {
         <div className="mb-12">
           <div className="bg-red-600 text-white px-6 py-4 rounded-2xl font-black text-2xl inline-block">Urban Deal</div>
         </div>
-
         <nav className="space-y-2 flex-1">
           <button onClick={() => setActiveTab("products")} className={`w-full text-left px-5 py-4 rounded-2xl flex items-center gap-3 ${activeTab === "products" ? "bg-red-600" : "hover:bg-zinc-800"}`}>
             <Package className="w-5 h-5" /> პროდუქტები
@@ -102,7 +88,6 @@ export default function AdminPage() {
             <Flame className="w-5 h-5" /> პრი-ორდერები
           </button>
         </nav>
-
         <button onClick={() => setIsLoggedIn(false)} className="mt-auto flex items-center gap-3 text-red-500 hover:text-red-400">
           <LogOut className="w-5 h-5" /> გამოსვლა
         </button>
@@ -116,7 +101,7 @@ export default function AdminPage() {
   )
 }
 
-// Keep the same ProductForm and ProductCard from before (shortened for now)
+// ProductsPanel and PreordersPanel + Form (same as before but with better category field)
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
@@ -158,23 +143,33 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
 }
 
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
-  const [form, setForm] = useState(product || {})
+  const [form, setForm] = useState(product || { cat: "sneakers" })
+
   return (
     <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
       <h2 className="text-2xl font-bold mb-6">{isPreorder ? "ახალი პრი-ორდერი" : "ახალი პროდუქტი"}</h2>
+      
       <div className="grid grid-cols-2 gap-6">
         <input placeholder="სახელი" value={form.name || ""} onChange={e => setForm({...form, name: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        
+        <div>
+          <label className="block text-sm mb-2">კატეგორია</label>
+          <input placeholder="კატეგორია (მაგ: sneakers, accessories, hoodies)" value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+        </div>
+        
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        
         {isPreorder && (
           <>
             <input placeholder="პრი-ორდერ ფასი" value={form.preorderPrice || ""} onChange={e => setForm({...form, preorderPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
             <input placeholder="ჩვეულებრივი ფასი" value={form.regularPrice || ""} onChange={e => setForm({...form, regularPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-            <input placeholder="მოსალოდნელი ჩამოსვლა (მაგ: მაისი 2025)" value={form.expectedArrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl col-span-2" />
+            <input placeholder="მოსალოდნელი ჩამოსვლა" value={form.expectedArrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl col-span-2" />
           </>
         )}
       </div>
+
       <div className="flex gap-4 mt-8">
         <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl">შენახვა</button>
         <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
@@ -190,7 +185,8 @@ function ProductCard({ product, onEdit, onDelete }: any) {
       <div className="flex-1">
         <h3 className="text-xl font-bold">{product.name}</h3>
         <p className="text-red-500">{product.brand} — {product.price}</p>
-        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expected_arrival || product.expectedArrival}</p>}
+        <p className="text-sm text-zinc-400">კატეგორია: {product.cat}</p>
+        {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expected_arrival}</p>}
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
       <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
