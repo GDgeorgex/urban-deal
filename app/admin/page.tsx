@@ -32,6 +32,7 @@ export default function AdminPage() {
       name: product.name,
       brand: product.brand,
       cat: product.cat || "sneakers",
+      gender: product.gender || "unisex",
       price: product.price,
       description: product.description || "",
       img: product.img,
@@ -100,7 +101,8 @@ export default function AdminPage() {
   )
 }
 
-// Shared Components
+// ... (ProductsPanel, PreordersPanel, ProductForm, ProductCard remain the same as previous version)
+
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
@@ -142,7 +144,7 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
 }
 
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
-  const [form, setForm] = useState(product || { cat: "sneakers" })
+  const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
 
   return (
     <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
@@ -153,10 +155,20 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         
         <div>
-          <label className="block text-sm mb-2 text-zinc-400">კატეგორია</label>
-          <input placeholder="კატეგორია (sneakers, accessories, hoodies...)" value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          <label className="block text-sm mb-2">კატეგორია</label>
+          <input placeholder="sneakers, hoodies, accessories..." value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
         </div>
         
+        <div>
+          <label className="block text-sm mb-2">სქესი / Gender</label>
+          <select value={form.gender || "unisex"} onChange={e => setForm({...form, gender: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full">
+            <option value="men">მამაკაცი (Men)</option>
+            <option value="women">ქალი (Women)</option>
+            <option value="unisex">Unisex</option>
+            <option value="kids">ბავშვები (Kids)</option>
+          </select>
+        </div>
+
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         
@@ -184,7 +196,7 @@ function ProductCard({ product, onEdit, onDelete }: any) {
       <div className="flex-1">
         <h3 className="text-xl font-bold">{product.name}</h3>
         <p className="text-red-500">{product.brand} — {product.price}</p>
-        <p className="text-sm text-zinc-400">კატეგორია: {product.cat}</p>
+        <p className="text-sm text-zinc-400">კატეგორია: {product.cat} • {product.gender}</p>
         {product.isPreorder && <p className="text-orange-500">პრი-ორდერი • {product.expected_arrival}</p>}
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
