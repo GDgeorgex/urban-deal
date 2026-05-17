@@ -1,22 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import {
-  LayoutDashboard,
-  Package,
-  Flame,
-  Home,
-  Image,
-  Tag,
-  Settings,
-  LogOut,
-  Plus,
-  Pencil,
-  Trash2,
-  ArrowLeft,
-  Save,
-  X
-} from "lucide-react"
+import { Package, Plus, Pencil, Trash2, LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 const ADMIN_PASSWORD = "udeal2025"
@@ -25,51 +9,41 @@ export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [password, setPassword] = useState("")
   const [error, setError] = useState(false)
-  const [activeTab, setActiveTab] = useState("products")
   const [products, setProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<any>(null)
   const [saveMessage, setSaveMessage] = useState("")
 
   const loadProducts = async () => {
-    setLoading(true)
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .order('id', { ascending: false })
-
-    if (error) {
-      console.error(error)
-      alert("შეცდომა: " + error.message)
-    } else {
-      setProducts(data || [])
-    }
-    setLoading(false)
+    
+    if (error) alert("Error loading: " + error.message)
+    else setProducts(data || [])
   }
 
   useEffect(() => {
     if (isLoggedIn) loadProducts()
   }, [isLoggedIn])
 
-  const showMessage = (msg: string) => {
-    setSaveMessage(msg)
-    setTimeout(() => setSaveMessage(""), 2500)
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) {
+      setIsLoggedIn(true)
+    } else {
+      setError(true)
+    }
   }
 
-  const handleSaveProduct = async (form: any) => {
-    setLoading(true)
-
+  const handleSave = async (form: any) => {
     const productData = {
       name: form.name,
       brand: form.brand,
-      cat: form.cat || "sneakers",
+      cat: "sneakers",
       price: form.price,
       description: form.description || "",
       img: form.img,
-      sizes: form.sizes ? form.sizes.join(",") : "",
-      isPreorder: form.isPreorder || false,
-      preorderPrice: form.preorderPrice || null,
-      regularPrice: form.regularPrice || null,
-      expectedArrival: form.expectedArrival || null,
+      sizes: form.sizes || "",
     }
 
     let result
@@ -82,43 +56,34 @@ export default function AdminPage() {
     if (result.error) {
       alert("შეცდომა: " + result.error.message)
     } else {
-      showMessage("✅ პროდუქტი შენახულია!")
+      setSaveMessage("✅ პროდუქტი შენახულია!")
+      setTimeout(() => setSaveMessage(""), 2000)
+      setEditingProduct(null)
       loadProducts()
     }
-    setLoading(false)
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm("ნამდვილად გინდა წაშლა?")) return
-    const { error } = await supabase.from('products').delete().eq('id', id)
-    if (error) alert("შეცდომა წაშლისას")
-    else {
-      showMessage("პროდუქტი წაიშალა")
+    if (confirm("წაშლა?")) {
+      await supabase.from('products').delete().eq('id', id)
       loadProducts()
     }
   }
 
-  // Login Screen
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="bg-card border border-border rounded-2xl p-12 w-full max-w-md text-center">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <div className="bg-red-600 text-white px-3 py-1.5 rounded-lg">
-              <span className="font-black text-lg tracking-tight">Urban Deal</span>
-            </div>
-          </div>
-          <h2 className="font-black text-3xl mb-2">ადმინ პანელი</h2>
-          <p className="text-muted-foreground mb-8">შეიყვანე პაროლი</p>
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 p-12 rounded-3xl text-center">
+          <h1 className="text-red-600 text-5xl font-black mb-8">Urban Deal</h1>
+          <h2 className="text-2xl mb-8">ადმინ პანელი</h2>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            placeholder="••••••••"
-            className="w-full bg-background border border-border rounded-lg px-4 py-3 text-center mb-4"
+            placeholder="პაროლი"
+            className="w-full p-5 bg-zinc-800 rounded-2xl text-white text-center mb-6"
           />
-          <button onClick={handleLogin} className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold">
+          <button onClick={handleLogin} className="w-full bg-red-600 py-5 rounded-2xl text-xl font-bold">
             შესვლა
           </button>
           {error && <p className="text-red-500 mt-4">არასწორი პაროლი</p>}
@@ -127,114 +92,47 @@ export default function AdminPage() {
     )
   }
 
-  function handleLogin() {
-    if (password === ADMIN_PASSWORD) setIsLoggedIn(true)
-    else setError(true)
-  }
-
   return (
-    <div className="min-h-screen bg-background flex">
-      {saveMessage && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg z-50 shadow-xl">
-          {saveMessage}
+    <div className="min-h-screen bg-black text-white p-8">
+      {saveMessage && <div className="fixed top-6 right-6 bg-green-600 px-8 py-4 rounded-2xl z-50">{saveMessage}</div>}
+
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-4xl font-black">პროდუქტები</h1>
+          <button 
+            onClick={() => setEditingProduct({})}
+            className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-medium"
+          >
+            <Plus className="w-5 h-5" /> ახალი პროდუქტი
+          </button>
         </div>
-      )}
 
-      {/* Sidebar */}
-      <aside className="w-64 bg-card border-r p-6 flex flex-col">
-        <div className="mb-10">
-          <div className="bg-red-600 text-white px-4 py-2 rounded inline-block font-black">Urban Deal</div>
-        </div>
-        <button onClick={() => setActiveTab("products")} className={`w-full text-left py-3 px-4 rounded-lg mb-1 flex items-center gap-3 ${activeTab === "products" ? "bg-red-600 text-white" : "hover:bg-gray-100"}`}>
-          <Package className="w-5 h-5" /> პროდუქტები
-        </button>
-        <button onClick={handleLogout} className="mt-auto text-red-600 flex items-center gap-2">
-          <LogOut className="w-5 h-5" /> გამოსვლა
-        </button>
-      </aside>
-
-      {/* Main Area */}
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-black mb-8">პროდუქტები</h1>
-
-        <button
-          onClick={() => setEditingProduct({})}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg mb-6 flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" /> ახალი პროდუქტი
-        </button>
-
-        {editingProduct !== undefined && (
-          <ProductEditForm 
-            product={editingProduct} 
-            onSave={handleSaveProduct} 
-            onCancel={() => setEditingProduct(undefined)} 
-          />
+        {editingProduct !== null && (
+          <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
+            <h2 className="text-2xl mb-6">ახალი პროდუქტი</h2>
+            <input placeholder="სახელი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
+            <input placeholder="ბრენდი" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.brand || ""} onChange={e => setEditingProduct({...editingProduct, brand: e.target.value})} />
+            <input placeholder="ფასი (მაგ: ₾ 650)" className="w-full p-4 bg-zinc-800 rounded-2xl mb-4" value={editingProduct.price || ""} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} />
+            <input placeholder="სურათის URL" className="w-full p-4 bg-zinc-800 rounded-2xl mb-6" value={editingProduct.img || ""} onChange={e => setEditingProduct({...editingProduct, img: e.target.value})} />
+            
+            <button onClick={() => handleSave(editingProduct)} className="bg-red-600 px-8 py-3 rounded-2xl mr-4">შენახვა</button>
+            <button onClick={() => setEditingProduct(null)} className="border border-zinc-700 px-8 py-3 rounded-2xl">გაუქმება</button>
+          </div>
         )}
 
-        <div className="bg-card rounded-xl border overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-zinc-900">
-              <tr>
-                <th className="text-left p-4">სურათი</th>
-                <th className="text-left p-4">სახელი</th>
-                <th className="text-left p-4">ბრენდი</th>
-                <th className="text-left p-4">ფასი</th>
-                <th className="text-left p-4">მოქმედება</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(p => (
-                <tr key={p.id} className="border-t hover:bg-zinc-900/50">
-                  <td className="p-4"><img src={p.img} className="w-12 h-12 object-cover rounded" /></td>
-                  <td className="p-4 font-medium">{p.name}</td>
-                  <td className="p-4">{p.brand}</td>
-                  <td className="p-4">{p.price}</td>
-                  <td className="p-4">
-                    <button onClick={() => setEditingProduct(p)} className="text-blue-500 mr-3"><Pencil /></button>
-                    <button onClick={() => handleDelete(p.id)} className="text-red-500"><Trash2 /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {products.map((p) => (
+            <div key={p.id} className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6">
+              <img src={p.img} alt={p.name} className="w-20 h-20 object-cover rounded-2xl" />
+              <div className="flex-1">
+                <div className="text-xl font-bold">{p.name}</div>
+                <div className="text-zinc-400">{p.brand} — {p.price}</div>
+              </div>
+              <button onClick={() => setEditingProduct(p)} className="text-blue-500"><Pencil className="w-6 h-6" /></button>
+              <button onClick={() => handleDelete(p.id)} className="text-red-500"><Trash2 className="w-6 h-6" /></button>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
-  )
-}
-
-function ProductEditForm({ product, onSave, onCancel }: any) {
-  const [form, setForm] = useState(product || {
-    name: "", brand: "", price: "", img: "", description: "", sizes: []
-  })
-
-  return (
-    <div className="bg-card border rounded-2xl p-8 mb-8">
-      <h2 className="text-2xl font-bold mb-6">{product?.id ? "რედაქტირება" : "ახალი პროდუქტი"}</h2>
-      
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block mb-2 font-medium">სახელი</label>
-          <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full border rounded-lg px-4 py-3" />
-        </div>
-        <div>
-          <label className="block mb-2 font-medium">ბრენდი</label>
-          <input value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} className="w-full border rounded-lg px-4 py-3" />
-        </div>
-        <div>
-          <label className="block mb-2 font-medium">ფასი</label>
-          <input value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="w-full border rounded-lg px-4 py-3" />
-        </div>
-        <div>
-          <label className="block mb-2 font-medium">სურათის URL</label>
-          <input value={form.img} onChange={e => setForm({...form, img: e.target.value})} className="w-full border rounded-lg px-4 py-3" />
-        </div>
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <button onClick={() => onSave(form)} className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold">შენახვა</button>
-        <button onClick={onCancel} className="border px-8 py-3 rounded-lg">გაუქმება</button>
       </div>
     </div>
   )
