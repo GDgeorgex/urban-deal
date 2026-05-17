@@ -58,7 +58,6 @@ export default function AdminPage() {
   }
 
   if (!isLoggedIn) {
-    // Login screen (same as before)
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="bg-zinc-900 p-12 rounded-3xl w-full max-w-md text-center">
@@ -101,7 +100,7 @@ export default function AdminPage() {
   )
 }
 
-// ProductsPanel and PreordersPanel + Form (same as before but with better category field)
+// Shared Components
 function ProductsPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
@@ -154,8 +153,8 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         <input placeholder="ბრენდი" value={form.brand || ""} onChange={e => setForm({...form, brand: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
         
         <div>
-          <label className="block text-sm mb-2">კატეგორია</label>
-          <input placeholder="კატეგორია (მაგ: sneakers, accessories, hoodies)" value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          <label className="block text-sm mb-2 text-zinc-400">კატეგორია</label>
+          <input placeholder="კატეგორია (sneakers, accessories, hoodies...)" value={form.cat || ""} onChange={e => setForm({...form, cat: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
         </div>
         
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
@@ -171,7 +170,7 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
       </div>
 
       <div className="flex gap-4 mt-8">
-        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl">შენახვა</button>
+        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold">შენახვა</button>
         <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
       </div>
     </div>
@@ -180,7 +179,7 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
 
 function ProductCard({ product, onEdit, onDelete }: any) {
   return (
-    <div className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6">
+    <div className="bg-zinc-900 p-6 rounded-3xl flex items-center gap-6 hover:bg-zinc-800 transition">
       <img src={product.img} className="w-24 h-24 object-cover rounded-2xl" />
       <div className="flex-1">
         <h3 className="text-xl font-bold">{product.name}</h3>
