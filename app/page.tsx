@@ -4,14 +4,14 @@ import Link from "next/link"
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* HERO SECTION - Rich Design */}
+      {/* Rich Hero Section */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542291026-7eec264c27ff')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black z-10" />
 
         <div className="relative z-20 text-center px-6 max-w-5xl">
           <div className="inline-block bg-red-600 text-white text-sm font-bold tracking-widest px-8 py-3 rounded-full mb-8">
-            🔥 ახალი კოლექცია 2025
+            🔥 ახალი კოლექცია 
           </div>
 
           <h1 className="text-7xl md:text-[110px] font-black tracking-[-4px] leading-none mb-6">
@@ -44,7 +44,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center items-center gap-x-12 gap-y-4 text-sm text-zinc-400">
           <div>✅ ორიგინალი პროდუქტები</div>
           <div>✅ სწრაფი მიწოდება თბილისში</div>
-          <div>✅ 14 დღიანი დაბრუნება</div>
+          <div>✅ 10 დღიანი დაბრუნება</div>
           <div>✅ უფასო საკონსულტაციო</div>
         </div>
       </div>
