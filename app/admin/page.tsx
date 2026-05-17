@@ -100,7 +100,46 @@ export default function AdminPage() {
   )
 }
 
-// ProductForm with Gender
+function ProductsPanel({ products, onSave, onDelete }: any) {
+  const [editing, setEditing] = useState<any>(null)
+  return (
+    <div>
+      <div className="flex justify-between mb-8">
+        <h1 className="text-4xl font-black">პროდუქტები</h1>
+        <button onClick={() => setEditing({})} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
+          <Plus /> ახალი პროდუქტი
+        </button>
+      </div>
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} />}
+      <div className="space-y-4">
+        {products.filter((p: any) => !p.isPreorder).map((p: any) => (
+          <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PreordersPanel({ products, onSave, onDelete }: any) {
+  const [editing, setEditing] = useState<any>(null)
+  return (
+    <div>
+      <div className="flex justify-between mb-8">
+        <h1 className="text-4xl font-black flex items-center gap-3"><Flame className="text-orange-500" /> პრი-ორდერები</h1>
+        <button onClick={() => setEditing({ isPreorder: true })} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
+          <Plus /> ახალი პრი-ორდერი
+        </button>
+      </div>
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder />}
+      <div className="space-y-4">
+        {products.filter((p: any) => p.isPreorder).map((p: any) => (
+          <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
   const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
 
@@ -150,46 +189,6 @@ function ProductCard({ product, onEdit, onDelete }: any) {
       </div>
       <button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button>
       <button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button>
-    </div>
-  )
-}
-
-function ProductsPanel({ products, onSave, onDelete }: any) {
-  const [editing, setEditing] = useState<any>(null)
-  return (
-    <div>
-      <div className="flex justify-between mb-8">
-        <h1 className="text-4xl font-black">პროდუქტები</h1>
-        <button onClick={() => setEditing({})} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
-          <Plus /> ახალი პროდუქტი
-        </button>
-      </div>
-      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} />}
-      <div className="space-y-4">
-        {products.filter((p: any) => !p.isPreorder).map((p: any) => (
-          <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function PreordersPanel({ products, onSave, onDelete }: any) {
-  const [editing, setEditing] = useState<any>(null)
-  return (
-    <div>
-      <div className="flex justify-between mb-8">
-        <h1 className="text-4xl font-black flex items-center gap-3"><Flame className="text-orange-500" /> პრი-ორდერები</h1>
-        <button onClick={() => setEditing({ isPreorder: true })} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
-          <Plus /> ახალი პრი-ორდერი
-        </button>
-      </div>
-      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder />}
-      <div className="space-y-4">
-        {products.filter((p: any) => p.isPreorder).map((p: any) => (
-          <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />
-        ))}
-      </div>
     </div>
   )
 }
