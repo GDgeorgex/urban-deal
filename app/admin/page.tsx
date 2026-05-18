@@ -144,16 +144,43 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
 
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
   const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
-  const [imageUrls, setImageUrls] = useState((product?.images || "").split(",").filter(Boolean))
+  const [imageUrls, setImageUrls] = useState<string[]>((product?.images || "").split(",").filter(Boolean))
+  const [uploading, setUploading] = useState(false)
 
-  const handleImageUrlAdd = () => {
-    setImageUrls([...imageUrls, ""])
-  }
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
 
-  const handleImageUrlChange = (index: number, value: string) => {
-    const newUrls = [...imageUrls]
-    newUrls[index] = value
-    setImageUrls(newUrls)
+    setUploading(true)
+    const files = Array.from(e.target.files)
+    const newUploadedUrls: string[] = []
+
+    for (const file of files) {
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      
+      // Upload to Supabase Storage
+      const { error } = await supabase.storage
+        .from("product-images") // MAKE SURE THIS MATCHES YOUR BUCKET NAME EXACTLY
+        .upload(fileName, file)
+
+      if (error) {
+        alert("შეცდომა სურათის ატვირთვისას: " + error.message)
+        continue
+      }
+
+      // Get the public URL
+      const { data: publicUrlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName)
+
+      if (publicUrlData) {
+        newUploadedUrls.push(publicUrlData.publicUrl)
+      }
+    }
+
+    setImageUrls(prev => [...prev, ...newUploadedUrls])
+    setUploading(false)
+    e.target.value = '' // Reset input
   }
 
   const handleImageUrlRemove = (index: number) => {
@@ -163,7 +190,8 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
   const handleSave = () => {
     const updatedForm = {
       ...form,
-      images: imageUrls.filter(Boolean).join(",")
+      images: imageUrls.filter(Boolean).join(","),
+      img: imageUrls.length > 0 ? imageUrls[0] : "" // Automatically set the first image as the main 'img'
     }
     onSave(updatedForm)
   }
