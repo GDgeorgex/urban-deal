@@ -9,7 +9,7 @@ export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [password, setPassword] = useState("")
   const [error, setError] = useState(false)
-  const [activeTab, setActiveTab] = useState<"products" | "preorders">("products")
+  const [activeTab, setActiveTab] = useState<"products" | "preorders" | "cms">("products")
   const [products, setProducts] = useState<any[]>([])
   const [saveMessage, setSaveMessage] = useState("")
 
