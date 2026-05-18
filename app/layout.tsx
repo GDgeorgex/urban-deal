@@ -54,14 +54,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cmsContent = await getCmsContent();
   return (
     <html lang="ka" className={`${montserrat.variable} ${inter.variable} bg-background`}>
       <body className="font-sans antialiased overflow-x-hidden">
+                {/* Pass cmsContent to children that need it */}
+        {/* This is a simplified approach. For more complex apps, consider Context API or a global state management. */}
+        {/* For now, we'll manually pass it to the HomePage component. */}
         {children}
         <AdminFloatButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
