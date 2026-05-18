@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { Package, Flame, Plus, Pencil, Trash2, LogOut, UploadCloud } from "lucide-react"
+import { Package, Flame, Plus, Pencil, Trash2, LogOut, UploadCloud, Globe, Save } from "lucide-react"
 
 const ADMIN_PASSWORD = "udeal2025"
 
