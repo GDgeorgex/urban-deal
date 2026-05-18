@@ -7,12 +7,32 @@ import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 
 export function Hero() {
+  const [content, setContent] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const { data } = await supabase
+        .from('site_content')
+        .select('content_key, content_value')
+        .eq('section_name', 'hero')
+      
+      if (data) {
+        const contentMap = data.reduce((acc, item) => {
+          acc[item.content_key] = item.content_value
+          return acc
+        }, {} as Record<string, string>)
+        setContent(contentMap)
+      }
+    }
+    fetchContent()
+  }, [])
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1800&q=85"
+          src={content.bg_image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1800&q=85"}
           alt="Hero background"
           fill
           className="object-cover"
@@ -23,20 +43,19 @@ export function Hero() {
 
       {/* Content */}
       <div className="relative z-10 text-center px-5 py-10">
-        <div className="inline-block bg-primary text-white text-[11px] font-bold tracking-[0.3em] px-4 py-1.5 rounded-full mb-7 shadow-[0_0_20px_var(--red-glow)] animate-fadeUp-delay-1">
-          ახალი კოლექცია 2025
+        <div className="inline-block bg-primary text-white text-[11px] font-bold tracking-[0.3em] px-4 py-1.5 rounded-full mb-7 shadow-[0_0_20px_var(--red-glow  )] animate-fadeUp-delay-1">
+          {content.badge || "ახალი კოლექცია 2025"}
         </div>
 
         <h1 className="font-black text-[clamp(68px,13vw,155px)] leading-[0.9] tracking-[-0.03em] text-white mb-2.5 animate-fadeUp-delay-2">
-          URBAN
-          <br />
-          <span className="text-primary drop-shadow-[0_0_40px_rgba(159,18,57,0.7)]">DEAL</span>
+          {content.title_part1 || "URBAN"}
+            
+
+          <span className="text-primary drop-shadow-[0_0_40px_rgba(159,18,57,0.7)]">{content.title_part2 || "DEAL"}</span>
         </h1>
 
-        <p className="text-[clamp(15px,2vw,20px)] font-light text-white/75 tracking-wide mb-10 animate-fadeUp-delay-3">
-          ევროპული სნიკერები — პირდაპირ თბილისში.
-          <br />
-          ორიგინალი. პრემიუმ. შენთვის.
+        <p className="text-[clamp(15px,2vw,20px)] font-light text-white/75 tracking-wide mb-10 animate-fadeUp-delay-3 whitespace-pre-wrap">
+          {content.subtitle || "ევროპული სნიკერები — პირდაპირ თბილისში.\nორიგინალი. პრემიუმ. შენთვის."}
         </p>
 
         <div className="flex gap-3.5 justify-center flex-wrap animate-fadeUp-delay-4">
@@ -44,13 +63,13 @@ export function Hero() {
             href="/products"
             className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-lg bg-primary text-white font-bold text-sm tracking-[0.06em] shadow-[0_4px_18px_var(--red-glow)] hover:bg-[var(--red-light)] hover:shadow-[0_6px_28px_rgba(190,18,60,0.55)] transition-all hover:-translate-y-0.5"
           >
-            კოლექცია →
+            {content.btn1_text || "კოლექცია →"}
           </Link>
           <Link
             href="/preorder"
             className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-lg bg-transparent text-white font-bold text-sm tracking-[0.06em] border-[1.5px] border-[var(--border2)] hover:border-primary hover:text-primary transition-all hover:-translate-y-0.5"
           >
-            პრი-ორდერი
+            {content.btn2_text || "პრი-ორდერი"}
           </Link>
         </div>
       </div>
