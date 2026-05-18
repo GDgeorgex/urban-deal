@@ -316,3 +316,112 @@ function ProductCard({ product, onEdit, onDelete }: any) {
     </div>
   )
 }
+
+function CMSPanel({ showMessage }: { showMessage: (msg: string) => void }) {
+  const [content, setContent] = useState<any[]>([])
+  const [editing, setEditing] = useState<any>(null)
+
+  const loadContent = async () => {
+    const { data } = await supabase.from('site_content').select('*').order('section_name')
+    setContent(data || [])
+  }
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  const handleSave = async () => {
+    if (!editing.section_name || !editing.content_key) {
+      alert("შეავსეთ სექციის სახელი და გასაღები")
+      return
+    }
+    const { error } = await supabase.from('site_content').upsert({
+      id: editing.id, // will be undefined for new items, which is fine
+      section_name: editing.section_name,
+      content_key: editing.content_key,
+      content_value: editing.content_value
+    })
+    
+    if (error) alert("შეცდომა: " + error.message)
+    else {
+      showMessage("✅ ტექსტი შენახულია!")
+      setEditing(null)
+      loadContent()
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("ნამდვილად გსურთ წაშლა?")) return
+    await supabase.from('site_content').delete().eq('id', id)
+    loadContent()
+    showMessage("წაიშალა")
+  }
+
+  // Group content by section
+  const groupedContent = content.reduce((acc, item) => {
+    if (!acc[item.section_name]) acc[item.section_name] = []
+    acc[item.section_name].push(item)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  return (
+    <div>
+      <div className="flex justify-between mb-8">
+        <h1 className="text-4xl font-black">საიტის ტექსტების მართვა</h1>
+        <button onClick={() => setEditing({ section_name: "", content_key: "", content_value: "" })} className="bg-red-600 px-6 py-3 rounded-2xl flex items-center gap-2">
+          <Plus /> ახალი ტექსტის დამატება
+        </button>
+      </div>
+
+      {editing && (
+        <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-700">
+          <h2 className="text-2xl font-bold mb-6">{editing.id ? "რედაქტირება" : "ახალი ტექსტი"}</h2>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm mb-2 text-zinc-400">სექცია (მაგ: hero, about, culture)</label>
+              <input value={editing.section_name} onChange={e => setEditing({...editing, section_name: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" placeholder="hero" />
+            </div>
+            <div>
+              <label className="block text-sm mb-2 text-zinc-400">გასაღები (მაგ: title, subtitle)</label>
+              <input value={editing.content_key} onChange={e => setEditing({...editing, content_key: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" placeholder="title" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm mb-2 text-zinc-400">მთავარი ტექსტი / მნიშვნელობა</label>
+            <textarea value={editing.content_value || ""} onChange={e => setEditing({...editing, content_value: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full h-32" placeholder="შეიყვანეთ ტექსტი აქ..." />
+          </div>
+          <div className="flex gap-4 mt-8">
+            <button onClick={handleSave} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold flex items-center gap-2"><Save className="w-5 h-5"/> შენახვა</button>
+            <button onClick={() => setEditing(null)} className="border border-zinc-700 px-8 py-4 rounded-2xl hover:bg-zinc-800">გაუქმება</button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-8">
+        {Object.keys(groupedContent).length === 0 && !editing && (
+          <p className="text-zinc-500">ჯერ არ არის დამატებული ტექსტები. დააჭირეთ "ახალი ტექსტის დამატება"-ს.</p>
+        )}
+        
+        {Object.entries(groupedContent).map(([section, items]) => (
+          <div key={section} className="bg-zinc-900/50 p-6 rounded-3xl border border-zinc-800">
+            <h2 className="text-2xl font-bold mb-4 text-red-500 capitalize">სექცია: {section}</h2>
+            <div className="space-y-3">
+              {items.map((item) => (
+                <div key={item.id} className="bg-zinc-800 p-4 rounded-2xl flex items-start justify-between gap-4 group">
+                  <div className="flex-1">
+                    <span className="inline-block bg-zinc-700 text-xs px-2 py-1 rounded mb-2 font-mono">{item.content_key}</span>
+                    <p className="text-zinc-300 whitespace-pre-wrap">{item.content_value}</p>
+                  </div>
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => setEditing(item)} className="p-2 bg-zinc-700 rounded-lg hover:bg-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(item.id)} className="p-2 bg-zinc-700 rounded-lg hover:bg-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
