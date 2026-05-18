@@ -7,18 +7,17 @@ import {
   AboutSection,
   ContactSection,
 } from "@/components/home-sections"
-import { CmsContent } from "../layout"; // Import the CmsContent type
 
-export default function HomePage({ cmsContent }: { cmsContent: CmsContent }) {
+export default function HomePage() {
   return (
     <>
       <Navbar />
       <main>
-        <Hero cmsContent={cmsContent} />
-        <PreorderStrip cmsContent={cmsContent} />
-        <FeaturedSection cmsContent={cmsContent} />
-        <AboutSection cmsContent={cmsContent} />
-        <ContactSection cmsContent={cmsContent} />
+        <Hero />
+        <PreorderStrip />
+        <FeaturedSection />
+        <AboutSection />
+        <ContactSection />
       </main>
       <Footer />
     </>
