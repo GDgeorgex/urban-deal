@@ -2,7 +2,7 @@
 import { Navbar } from "@/components/navbar"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { MessageCircle } from "lucide-react"
+import { MessageCircle, X, ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -12,6 +12,10 @@ export default function ProductsPage() {
   const [selectedBrand, setSelectedBrand] = useState("all")
   const [selectedGender, setSelectedGender] = useState("all")
   const [currentImageIndex, setCurrentImageIndex] = useState<{[key: number]: number}>({})
+  
+  // State for the expanded view (Modal)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [modalImageIndex, setModalImageIndex] = useState(0)
 
   useEffect(() => {
     async function fetchProducts() {
@@ -38,7 +42,7 @@ export default function ProductsPage() {
 
   const contactWhatsApp = (product: any) => {
     const text = `გამარჯობა! მინდა შევუკვეთო: ${product.name} (${product.brand}) - ${product.price}`
-    window.open(`https://wa.me/995592013611?text=${encodeURIComponent(text )}`, '_blank')
+    window.open(`https://wa.me/995592013611?text=${encodeURIComponent(text  )}`, '_blank')
   }
 
   const getProductImages = (product: any) => {
@@ -48,18 +52,31 @@ export default function ProductsPage() {
     return product.img ? [product.img] : []
   }
 
-  const nextImage = (productId: number, imageCount: number) => {
+  const nextImage = (productId: number, imageCount: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation() // Prevent opening the modal when clicking arrows
     setCurrentImageIndex(prev => ({
       ...prev,
       [productId]: ((prev[productId] || 0) + 1) % imageCount
     }))
   }
 
-  const prevImage = (productId: number, imageCount: number) => {
+  const prevImage = (productId: number, imageCount: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation() // Prevent opening the modal when clicking arrows
     setCurrentImageIndex(prev => ({
       ...prev,
       [productId]: ((prev[productId] || 0) - 1 + imageCount) % imageCount
     }))
+  }
+
+  const openModal = (product: any) => {
+    setSelectedProduct(product)
+    setModalImageIndex(currentImageIndex[product.id] || 0)
+    document.body.style.overflow = 'hidden' // Disable scrolling when modal is open
+  }
+
+  const closeModal = () => {
+    setSelectedProduct(null)
+    document.body.style.overflow = 'auto' // Re-enable scrolling
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-3xl">იწვირთება...</div>
@@ -125,28 +142,32 @@ export default function ProductsPage() {
               const images = getProductImages(product)
               const currentIdx = currentImageIndex[product.id] || 0
               return (
-                <div key={product.id} className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 transition-all">
-                  <div className="h-80 relative bg-black">
+                <div 
+                  key={product.id} 
+                  onClick={() => openModal(product)}
+                  className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden hover:border-red-600/50 transition-all cursor-pointer group"
+                >
+                  <div className="h-80 relative bg-black overflow-hidden">
                     {images.length > 0 ? (
                       <>
                         <img 
                           src={images[currentIdx]} 
                           alt={product.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         {images.length > 1 && (
                           <>
                             <button 
-                              onClick={() => prevImage(product.id, images.length)}
-                              className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 p-2 rounded-full text-white"
+                              onClick={(e) => prevImage(product.id, images.length, e)}
+                              className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 p-2 rounded-full text-white z-10"
                             >
-                              ←
+                              <ChevronLeft className="w-5 h-5" />
                             </button>
                             <button 
-                              onClick={() => nextImage(product.id, images.length)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 p-2 rounded-full text-white"
+                              onClick={(e) => nextImage(product.id, images.length, e)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 p-2 rounded-full text-white z-10"
                             >
-                              →
+                              <ChevronRight className="w-5 h-5" />
                             </button>
                             <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
                               {currentIdx + 1}/{images.length}
@@ -181,7 +202,10 @@ export default function ProductsPage() {
                     )}
 
                     <button 
-                      onClick={() => contactWhatsApp(product)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        contactWhatsApp(product)
+                      }}
                       className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 transition"
                     >
                       <MessageCircle className="w-5 h-5" />
@@ -200,6 +224,98 @@ export default function ProductsPage() {
           )}
         </div>
       </div>
+
+      {/* PRODUCT DETAIL MODAL */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={closeModal} />
+          
+          <div className="relative bg-zinc-900 w-full max-w-6xl max-h-[90vh] rounded-[40px] overflow-hidden flex flex-col md:flex-row shadow-2xl border border-zinc-800 animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={closeModal}
+              className="absolute top-6 right-6 z-50 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full transition"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Left Side: Image Gallery */}
+            <div className="w-full md:w-3/5 h-[40vh] md:h-auto relative bg-black">
+              {getProductImages(selectedProduct).length > 0 ? (
+                <>
+                  <img 
+                    src={getProductImages(selectedProduct)[modalImageIndex]} 
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-contain"
+                  />
+                  {getProductImages(selectedProduct).length > 1 && (
+                    <>
+                      <button 
+                        onClick={() => setModalImageIndex(prev => (prev - 1 + getProductImages(selectedProduct).length) % getProductImages(selectedProduct).length)}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full text-white backdrop-blur-md transition"
+                      >
+                        <ChevronLeft className="w-8 h-8" />
+                      </button>
+                      <button 
+                        onClick={() => setModalImageIndex(prev => (prev + 1) % getProductImages(selectedProduct).length)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full text-white backdrop-blur-md transition"
+                      >
+                        <ChevronRight className="w-8 h-8" />
+                      </button>
+                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-full px-4">
+                        {getProductImages(selectedProduct).map((_, idx) => (
+                          <button 
+                            key={idx}
+                            onClick={() => setModalImageIndex(idx)}
+                            className={`w-2.5 h-2.5 rounded-full transition-all ${idx === modalImageIndex ? 'bg-red-600 w-8' : 'bg-white/30 hover:bg-white/50'}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-zinc-500">სურათი ხელმისაწვდომი არ არის</div>
+              )}
+            </div>
+
+            {/* Right Side: Details */}
+            <div className="w-full md:w-2/5 p-8 md:p-12 overflow-y-auto bg-zinc-900 border-l border-zinc-800">
+              <div className="uppercase text-red-500 font-bold tracking-[0.2em] text-sm mb-4">{selectedProduct.brand}</div>
+              <h2 className="text-4xl md:text-5xl font-black leading-tight mb-6">{selectedProduct.name}</h2>
+              
+              <div className="text-4xl font-black text-white mb-8">{selectedProduct.price}</div>
+
+              {selectedProduct.description && (
+                <div className="mb-10">
+                  <h4 className="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">აღწერა</h4>
+                  <p className="text-zinc-300 leading-relaxed text-lg whitespace-pre-wrap">{selectedProduct.description}</p>
+                </div>
+              )}
+
+              {selectedProduct.sizes && (
+                <div className="mb-10">
+                  <h4 className="text-xs uppercase tracking-widest text-zinc-500 font-bold mb-4">ხელმისაწვდომი ზომები</h4>
+                  <div className="flex flex-wrap gap-3">
+                    {selectedProduct.sizes.split(",").map((size: string, idx: number) => (
+                      <span key={idx} className="bg-zinc-800 border border-zinc-700 px-6 py-3 rounded-2xl text-lg font-bold">{size.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button 
+                onClick={() => contactWhatsApp(selectedProduct)}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-[24px] font-bold text-xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-green-600/20"
+              >
+                <MessageCircle className="w-6 h-6" />
+                შეკვეთის გაკეთება
+              </button>
+              
+              <p className="text-center text-zinc-500 text-xs mt-6 uppercase tracking-widest">უფასო მიწოდება თბილისში</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
