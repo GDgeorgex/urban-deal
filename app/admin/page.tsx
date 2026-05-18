@@ -97,9 +97,10 @@ export default function AdminPage() {
         </button>
       </aside>
 
-      <main className="flex-1 p-10">
+            <main className="flex-1 p-10">
         {activeTab === "products" && <ProductsPanel products={products} onSave={saveProduct} onDelete={deleteProduct} />}
         {activeTab === "preorders" && <PreordersPanel products={products} onSave={saveProduct} onDelete={deleteProduct} />}
+        {activeTab === "cms" && <CMSPanel showMessage={showMessage} />}
       </main>
     </div>
   )
