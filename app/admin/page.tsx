@@ -144,6 +144,29 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
 
 function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
   const [form, setForm] = useState(product || { cat: "sneakers", gender: "unisex" })
+  const [imageUrls, setImageUrls] = useState((product?.images || "").split(",").filter(Boolean))
+
+  const handleImageUrlAdd = () => {
+    setImageUrls([...imageUrls, ""])
+  }
+
+  const handleImageUrlChange = (index: number, value: string) => {
+    const newUrls = [...imageUrls]
+    newUrls[index] = value
+    setImageUrls(newUrls)
+  }
+
+  const handleImageUrlRemove = (index: number) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index))
+  }
+
+  const handleSave = () => {
+    const updatedForm = {
+      ...form,
+      images: imageUrls.filter(Boolean).join(",")
+    }
+    onSave(updatedForm)
+  }
 
   return (
     <div className="bg-zinc-900 p-8 rounded-3xl mb-10">
@@ -169,11 +192,55 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         </div>
 
         <input placeholder="ფასი" value={form.price || ""} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
-        <input placeholder="სურათის URL" value={form.img || ""} onChange={e => setForm({...form, img: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
+        
+        <input placeholder="ზომები (მაგ: 36,37,38,39,40)" value={form.sizes || ""} onChange={e => setForm({...form, sizes: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl" />
       </div>
 
+      {/* Description */}
+      <div className="mt-6">
+        <label className="block text-sm mb-2">აღწერა</label>
+        <textarea placeholder="პროდუქტის დეტალური აღწერა..." value={form.description || ""} onChange={e => setForm({...form, description: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full h-24" />
+      </div>
+
+      {/* Image URLs */}
+      <div className="mt-6">
+        <label className="block text-sm mb-2">სურათის URL-ები</label>
+        <div className="space-y-3">
+          {imageUrls.map((url, index) => (
+            <div key={index} className="flex gap-2">
+              <input 
+                placeholder={`სურათის URL ${index + 1}`} 
+                value={url} 
+                onChange={e => handleImageUrlChange(index, e.target.value)} 
+                className="flex-1 bg-zinc-800 p-4 rounded-2xl" 
+              />
+              <button onClick={() => handleImageUrlRemove(index)} className="bg-red-600 px-4 py-2 rounded-2xl text-sm">წაშლა</button>
+            </div>
+          ))}
+          <button onClick={handleImageUrlAdd} className="bg-zinc-800 px-4 py-2 rounded-2xl text-sm border border-zinc-700">+ სურათის დამატება</button>
+        </div>
+      </div>
+
+      {/* Pre-order specific fields */}
+      {isPreorder && (
+        <div className="mt-6 grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm mb-2">ჩვეულებრივი ფასი</label>
+            <input placeholder="ჩვეულებრივი ფასი" value={form.regularPrice || ""} onChange={e => setForm({...form, regularPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          </div>
+          <div>
+            <label className="block text-sm mb-2">პრი-ორდერ ფასი</label>
+            <input placeholder="პრი-ორდერ ფასი" value={form.preorderPrice || ""} onChange={e => setForm({...form, preorderPrice: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          </div>
+          <div>
+            <label className="block text-sm mb-2">მოსალოდნელი ჩამოსვლა (dd/mm/yyyy)</label>
+            <input placeholder="15/05/2026" value={form.expectedArrival || form.expected_arrival || ""} onChange={e => setForm({...form, expectedArrival: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full" />
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-4 mt-8">
-        <button onClick={() => onSave(form)} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold">შენახვა</button>
+        <button onClick={handleSave} className="bg-red-600 px-8 py-4 rounded-2xl font-semibold">შენახვა</button>
         <button onClick={onCancel} className="border border-zinc-700 px-8 py-4 rounded-2xl">გაუქმება</button>
       </div>
     </div>
