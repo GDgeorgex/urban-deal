@@ -20,10 +20,10 @@ export default function AdminPage() {
   }
 
   const loadData = async () => {
-    const { data: pData } = await supabase.from('products').select('*').order('id', { ascending: false })
+    const { data: pData } = await supabase.from("products").select("*").order("id", { ascending: false })
     setProducts(pData || [])
     
-    const { data: cData } = await supabase.from('site_content').select('*').order('section', { ascending: true })
+    const { data: cData } = await supabase.from("site_content").select("*").order("section", { ascending: true })
     setCmsContent(cData || [])
   }
 
@@ -32,7 +32,7 @@ export default function AdminPage() {
   }, [isLoggedIn])
 
   const saveProduct = async (product: any) => {
-    const { error } = await supabase.from('products').upsert(product)
+    const { error } = await supabase.from("products").upsert(product)
     if (error) alert("შეცდომა: " + error.message)
     else {
       showMessage("✅ შენახულია!")
@@ -42,13 +42,13 @@ export default function AdminPage() {
 
   const deleteProduct = async (id: number) => {
     if (!confirm("წაშლა?")) return
-    await supabase.from('products').delete().eq('id', id)
+    await supabase.from("products").delete().eq("id", id)
     loadData()
     showMessage("წაიშალა")
   }
 
   const saveCmsItem = async (item: any) => {
-    const { error } = await supabase.from('site_content').upsert(item)
+    const { error } = await supabase.from("site_content").upsert(item)
     if (error) alert("შეცდომა: " + error.message)
     else {
       showMessage("✅ კონტენტი განახლდა!")
@@ -135,10 +135,10 @@ function CmsItem({ item, onSave }: any) {
     if (!file) return
     setUploading(true)
     const fileName = `cms-${Date.now()}-${file.name}`
-    const { error } = await supabase.storage.from('product-images').upload(fileName, file)
+    const { error } = await supabase.storage.from("product-images").upload(fileName, file)
     if (error) alert(error.message)
     else {
-      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName)
+      const { data } = supabase.storage.from("product-images").getPublicUrl(fileName)
       setVal(data.publicUrl)
     }
     setUploading(false)
