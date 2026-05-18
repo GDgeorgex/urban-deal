@@ -1,24 +1,4 @@
-import type { Metadata } from "next"
-import { supabase } from "@/lib/supabase"
-
-// Define a type for your CMS content for better type safety
-export type CmsContent = {
-  id: string;
-  section: string;
-  content_type: string;
-  value: string;
-  label: string;
-}[];
-
-// Function to fetch CMS content
-async function getCmsContent(): Promise<CmsContent> {
-  const { data, error } = await supabase.from('site_content').select('*');
-  if (error) {
-    console.error('Error fetching CMS content:', error);
-    return [];
-  }
-  return data || [];
-}
+import type { Metadata, Viewport } from 'next'
 import { Montserrat, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AdminFloatButton } from '@/components/admin-float-button'
@@ -54,14 +34,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cmsContent = await getCmsContent();
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="ka" className={`${montserrat.variable} ${inter.variable} bg-background`}>
       <body className="font-sans antialiased overflow-x-hidden">
-                {/* Pass cmsContent to children that need it */}
-        {/* This is a simplified approach. For more complex apps, consider Context API or a global state management. */}
-        {/* For now, we'll manually pass it to the HomePage component. */}
         {children}
         <AdminFloatButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
