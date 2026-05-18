@@ -230,25 +230,48 @@ function ProductForm({ product, onSave, onCancel, isPreorder = false }: any) {
         <textarea placeholder="პროდუქტის დეტალური აღწერა..." value={form.description || ""} onChange={e => setForm({...form, description: e.target.value})} className="bg-zinc-800 p-4 rounded-2xl w-full h-24" />
       </div>
 
-      {/* Image URLs */}
+            {/* Image Uploads */}
       <div className="mt-6">
-        <label className="block text-sm mb-2">სურათის URL-ები</label>
-        <div className="space-y-3">
-          {imageUrls.map((url, index) => (
-            <div key={index} className="flex gap-2">
-              <input 
-                placeholder={`სურათის URL ${index + 1}`} 
-                value={url} 
-                onChange={e => handleImageUrlChange(index, e.target.value)} 
-                className="flex-1 bg-zinc-800 p-4 rounded-2xl" 
-              />
-              <button onClick={() => handleImageUrlRemove(index)} className="bg-red-600 px-4 py-2 rounded-2xl text-sm">წაშლა</button>
+        <label className="block text-sm mb-2">სურათები (შეგიძლიათ აირჩიოთ რამდენიმე)</label>
+        <div className="space-y-4">
+          
+          {/* Display uploaded images */}
+          {imageUrls.length > 0 && (
+            <div className="grid grid-cols-4 gap-4">
+              {imageUrls.map((url, index) => (
+                <div key={index} className="relative group">
+                  <img src={url} alt={`Upload ${index}`} className="w-full h-24 object-cover rounded-xl border border-zinc-700" />
+                  <button 
+                    onClick={() => handleImageUrlRemove(index)} 
+                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="წაშლა"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-          <button onClick={handleImageUrlAdd} className="bg-zinc-800 px-4 py-2 rounded-2xl text-sm border border-zinc-700">+ სურათის დამატება</button>
+          )}
+
+          {/* Upload Button */}
+          <div>
+            <label htmlFor="file-upload" className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold cursor-pointer transition-colors ${uploading ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-800 hover:bg-zinc-700 border border-zinc-700'}`}>
+              <UploadCloud className="w-5 h-5" /> 
+              {uploading ? "იტვირთება..." : "კომპიუტერიდან ატვირთვა"}
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={uploading}
+            />
+          </div>
         </div>
       </div>
-
+      
       {/* Pre-order specific fields */}
       {isPreorder && (
         <div className="mt-6 grid grid-cols-2 gap-6">
