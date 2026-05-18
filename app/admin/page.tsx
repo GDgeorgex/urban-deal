@@ -81,12 +81,15 @@ export default function AdminPage() {
         <div className="mb-12">
           <div className="bg-red-600 text-white px-6 py-4 rounded-2xl font-black text-2xl inline-block">Urban Deal</div>
         </div>
-        <nav className="space-y-2 flex-1">
+               <nav className="space-y-2 flex-1">
           <button onClick={() => setActiveTab("products")} className={`w-full text-left px-5 py-4 rounded-2xl flex items-center gap-3 ${activeTab === "products" ? "bg-red-600" : "hover:bg-zinc-800"}`}>
             <Package className="w-5 h-5" /> პროდუქტები
           </button>
           <button onClick={() => setActiveTab("preorders")} className={`w-full text-left px-5 py-4 rounded-2xl flex items-center gap-3 ${activeTab === "preorders" ? "bg-red-600" : "hover:bg-zinc-800"}`}>
             <Flame className="w-5 h-5" /> პრი-ორდერები
+          </button>
+          <button onClick={() => setActiveTab("cms")} className={`w-full text-left px-5 py-4 rounded-2xl flex items-center gap-3 ${activeTab === "cms" ? "bg-red-600" : "hover:bg-zinc-800"}`}>
+            <Globe className="w-5 h-5" /> საიტის ტექსტები
           </button>
         </nav>
         <button onClick={() => setIsLoggedIn(false)} className="mt-auto flex items-center gap-3 text-red-500 hover:text-red-400">
