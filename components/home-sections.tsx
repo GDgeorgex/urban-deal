@@ -3,6 +3,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { CheckCircle, Globe, MapPin } from "lucide-react"
+import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabase"
 
 export function Hero() {
   return (
