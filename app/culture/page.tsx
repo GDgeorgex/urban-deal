@@ -4,94 +4,82 @@ import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { supabase } from "@/lib/supabase"
+import { PageTracker } from "@/components/home-sections"
 
 export default function CulturePage() {
-  const [cms, setCms] = useState<any[]>([])
+  const [posts, setPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchCms() {
-      const { data } = await supabase.from('site_content').select('*')
-      if (data) setCms(data)
+    async function fetchPosts() {
+      const { data } = await supabase.from('culture_posts').select('*').order('created_at', { ascending: false })
+      setPosts(data || [])
+      setLoading(false)
     }
-    fetchCms()
+    fetchPosts()
   }, [])
-
-  const getContent = (id: string, fallback: string) => {
-    const item = cms.find(c => c.id === id)
-    return item ? item.value : fallback
-  }
-
-  const tiles = [
-    {
-      img: getContent('culture_tile1_img', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80' ),
-      title: getContent('culture_tile1_title', 'Nike Air Collection'),
-      desc: getContent('culture_tile1_desc', 'ლეგენდა, რომელიც არასდროს კვდება'),
-    },
-    {
-      img: getContent('culture_tile2_img', 'https://images.unsplash.com/photo-1607522370275-f6fd21012ec1?w=800&q=80' ),
-      title: getContent('culture_tile2_title', 'Adidas Yeezy'),
-      desc: getContent('culture_tile2_desc', 'ყველაზე სასწაული სნიკერი ოდესმე'),
-    },
-    {
-      img: getContent('culture_tile3_img', 'https://images.unsplash.com/photo-1556906781-9a414e2a9c86?w=800&q=80' ),
-      title: getContent('culture_tile3_title', 'Jordan Heritage'),
-      desc: getContent('culture_tile3_desc', 'ნამდვილი ქუჩის ლეგენდა'),
-    },
-    {
-      img: getContent('culture_tile4_img', 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&q=80' ),
-      title: getContent('culture_tile4_title', 'New Balance'),
-      desc: getContent('culture_tile4_desc', 'კომფორტი შეხვდა სტილს'),
-    },
-  ]
-
-  const heroBadge = getContent('culture_hero_badge', 'ურბანული კულტურა');
-  const titleUrban = getContent('culture_hero_title_urban', 'URBAN');
-  const titleCulture = getContent('culture_hero_title_culture', 'CULTURE');
-  const heroDesc = getContent('culture_hero_description', 'სნიკერი — ეს არ არის უბრალო ფეხსაცმელი. ეს შენი სტილია, შენი ვიბი, შენი ნაბიჯი.');
-  const heroBg = getContent('culture_hero_bg', 'https://images.unsplash.com/photo-1556906781-9a414e2a9c86?w=1600&q=80' );
-
-  const m1 = getContent('culture_manifesto_title_part1', 'ვართ ჩვენ, ვართ');
-  const m2 = getContent('culture_manifesto_title_part2', 'Urban Deal');
-  const mText = getContent('culture_manifesto_text', 'ჩვენ ვაყიდით სნიკერებს, მაგრამ ასევე ვყიდით ენერგიას. სნიკერ-კულტურა საქართველოში — ეს ჩვენი ვნებაა. ყოველი ახალი კოლექცია — ეს გამოცხადება. Urban Deal-ი ეს არ არის უბრალო მაღაზია — ეს სტილის სახლია.');
 
   return (
     <>
       <Navbar />
-      <main>
-        <div className="relative py-32 text-center overflow-hidden">
-          <Image src={heroBg} alt="Culture hero" fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/80" />
+      <PageTracker path="Culture" />
+      <main className="bg-black min-h-screen">
+        {/* Hero */}
+        <div className="relative py-48 text-center overflow-hidden">
+          <Image src="https://images.unsplash.com/photo-1552346154-21d32810aba3?w=1800&q=80" alt="Culture hero" fill className="object-cover opacity-50 scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black" />
           <div className="relative z-10 max-w-[1300px] mx-auto px-7">
-            <div className="text-[11px] font-bold tracking-[0.3em] uppercase text-accent mb-3">{heroBadge}</div>
-            <h1 className="font-black text-[clamp(68px,13vw,155px)] leading-[0.9] tracking-[-0.03em] text-white mb-4">
-              {titleUrban}  
-<span className="text-primary">{titleCulture}</span>
+            <div className="text-[11px] font-black tracking-[0.5em] uppercase text-primary mb-6">ურბანული კულტურა</div>
+            <h1 className="font-black text-[clamp(50px,10vw,120px )] leading-none tracking-tighter text-white mb-8 italic">
+              URBAN  
+<span className="text-zinc-700">CULTURE</span>
             </h1>
-            <p className="text-lg text-white/70 max-w-[540px] mx-auto">{heroDesc}</p>
+            <p className="text-xl text-white/60 max-w-2xl mx-auto font-medium">სნიკერ-კულტურა საქართველოში — ეს ჩვენი ვნებაა. გაეცანით უახლეს ტრენდებსა და სტილს.</p>
           </div>
         </div>
 
-        <section className="py-16">
+        {/* Blog Posts Grid */}
+        <section className="py-24">
           <div className="max-w-[1300px] mx-auto px-7">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-16">
-              {tiles.map((tile, i) => (
-                <div key={i} className="relative overflow-hidden rounded-[14px] cursor-pointer group">
-                  <Image src={tile.img} alt={tile.title} width={800} height={320} className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-                    <div>
-                      <h3 className="font-black text-[22px] mb-1">{tile.title}</h3>
-                      <p className="text-[13px] text-white/70">{tile.desc}</p>
+            {loading ? (
+              <div className="text-center py-20 text-zinc-500 font-bold">იტვირთება...</div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-20 text-zinc-500 font-bold italic">პოსტები ჯერ არ არის დამატებული.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {posts.map((post) => (
+                  <div key={post.id} className="group cursor-pointer">
+                    <div className="relative aspect-video rounded-[40px] overflow-hidden mb-8 border border-white/5">
+                      <Image src={post.image_url || "/placeholder.jpg"} alt={post.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                    </div>
+                    <div className="px-4">
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">სტილი</span>
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{new Date(post.created_at).toLocaleDateString('ka-GE')}</span>
+                      </div>
+                      <h2 className="text-4xl font-black text-white mb-4 tracking-tighter italic group-hover:text-primary transition-colors">{post.title}</h2>
+                      <p className="text-zinc-400 text-lg leading-relaxed font-medium mb-8 line-clamp-3">{post.description}</p>
+                      
+                      {/* Expanded Content (Simple Modal or Accordion can be added here) */}
+                      <div className="pt-8 border-t border-white/5">
+                        <p className="text-zinc-500 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="bg-card rounded-[14px] p-14 text-center">
-              <h2 className="font-black text-[clamp(32px,4vw,52px)] tracking-[-0.02em] leading-tight mb-5">
-                {m1} <span className="text-primary">{m2}</span>
-              </h2>
-              <p className="text-base text-muted-foreground max-w-[680px] mx-auto leading-relaxed">{mText}</p>
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Manifesto */}
+        <section className="py-32 bg-zinc-950">
+          <div className="max-w-[1000px] mx-auto px-7 text-center">
+            <h2 className="font-black text-6xl tracking-tighter italic mb-10">ვართ ჩვენ, ვართ <span className="text-primary">Urban Deal</span></h2>
+            <p className="text-2xl text-zinc-400 leading-relaxed font-medium italic">
+              ჩვენ არ ვყიდით მხოლოდ სნიკერებს, ჩვენ ვქმნით მოძრაობას. Urban Deal-ი არის სტილის, თავისუფლების და ავთენტურობის სიმბოლო საქართველოში.
+            </p>
           </div>
         </section>
       </main>
