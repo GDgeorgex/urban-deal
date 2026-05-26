@@ -260,8 +260,21 @@ function ProductsPanel({ products, onSave, onDelete }: any) {
   return (
     <div>
       <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">პროდუქტები</h1><button onClick={() => setEditing({})} className="bg-red-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი</button></div>
-      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} />}
-      <div className="space-y-4">{products.filter((p: any) => !p.isPreorder).map((p: any) => <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />)}</div>
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder={false} />}
+      <div className="space-y-4">
+        {products.filter((p: any) => !p.isPreorder).map((p: any) => (
+          <div key={p.id} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 flex justify-between items-center">
+            <div className="flex-1">
+              <h3 className="font-bold text-lg">{p.name}</h3>
+              <p className="text-zinc-400">{p.brand} • {p.price}</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setEditing(p)} className="bg-blue-600 px-4 py-2 rounded-lg"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => onDelete(p.id)} className="bg-red-600 px-4 py-2 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -270,9 +283,22 @@ function PreordersPanel({ products, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
     <div>
-      <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">პრი-ორდერები</h1><button onClick={() => setEditing({isPreorder:true})} className="bg-red-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი</button></div>
-      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder />}
-      <div className="space-y-4">{products.filter((p: any) => p.isPreorder).map((p: any) => <ProductCard key={p.id} product={p} onEdit={setEditing} onDelete={onDelete} />)}</div>
+      <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">პრი-ორდერები</h1><button onClick={() => setEditing({ isPreorder: true })} className="bg-orange-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი</button></div>
+      {editing && <ProductForm product={editing} onSave={onSave} onCancel={() => setEditing(null)} isPreorder={true} />}
+      <div className="space-y-4">
+        {products.filter((p: any) => p.isPreorder).map((p: any) => (
+          <div key={p.id} className="bg-zinc-900 p-6 rounded-2xl border border-orange-500/30 flex justify-between items-center">
+            <div className="flex-1">
+              <h3 className="font-bold text-lg">{p.name}</h3>
+              <p className="text-zinc-400">{p.brand} • {p.preorderPrice || p.price} (Pre-order)</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setEditing(p)} className="bg-blue-600 px-4 py-2 rounded-lg"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => onDelete(p.id)} className="bg-red-600 px-4 py-2 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -281,26 +307,29 @@ function CulturePanel({ posts, onSave, onDelete }: any) {
   const [editing, setEditing] = useState<any>(null)
   return (
     <div>
-      <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">კულტურა</h1><button onClick={() => setEditing({})} className="bg-red-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი პოსტი</button></div>
-      {editing && <CultureForm post={editing} onSave={(p: any) => { onSave(p); setEditing(null); }} onCancel={() => setEditing(null)} />}
-      <div className="grid grid-cols-1 gap-4">{posts.map((post: any) => <div key={post.id} className="bg-zinc-900 p-4 rounded-xl flex items-center gap-4 border border-zinc-800">
-        <img src={post.image_url} className="w-20 h-12 object-cover rounded-lg" />
-        <div className="flex-1 font-bold text-white">{post.title}</div>
-        <button onClick={() => setEditing(post)} className="text-blue-500"><Pencil /></button>
-        <button onClick={() => onDelete(post.id)} className="text-red-500"><Trash2 /></button>
-      </div>)}</div>
-    </div>
-  )
-}
-
-function CultureForm({ post, onSave, onCancel }: any) {
-  const [form, setForm] = useState(post || {})
-  return (
-    <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
-      <input placeholder="სათაური" value={form.title || ""} onChange={e => setForm({...form, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 text-white" />
-      <textarea placeholder="შინაარსი" value={form.content || ""} onChange={e => setForm({...form, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 h-40 text-white" />
-      <input placeholder="სურათის URL" value={form.image_url || ""} onChange={e => setForm({...form, image_url: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 text-white" />
-      <div className="flex gap-4"><button onClick={() => onSave(form)} className="bg-red-600 px-8 py-3 rounded-xl font-bold text-white">შენახვა</button><button onClick={onCancel} className="bg-zinc-800 px-8 py-3 rounded-xl font-bold text-white">გაუქმება</button></div>
+      <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">კულტურა</h1><button onClick={() => setEditing({})} className="bg-purple-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი პოსტი</button></div>
+      {editing && (
+        <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
+          <input placeholder="სათაური" defaultValue={editing.title} onChange={e => setEditing({...editing, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
+          <textarea placeholder="ტექსტი" defaultValue={editing.content} onChange={e => setEditing({...editing, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-32 mb-4" />
+          <div className="flex gap-4">
+            <button onClick={() => { onSave(editing); setEditing(null) }} className="bg-purple-600 px-6 py-2 rounded-xl font-bold">შენახვა</button>
+            <button onClick={() => setEditing(null)} className="bg-zinc-800 px-6 py-2 rounded-xl font-bold">გაუქმება</button>
+          </div>
+        </div>
+      )}
+      <div className="space-y-4">
+        {posts.map((p: any) => (
+          <div key={p.id} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+            <h3 className="font-bold text-lg mb-2">{p.title}</h3>
+            <p className="text-zinc-400 mb-4 line-clamp-2">{p.content}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setEditing(p)} className="bg-blue-600 px-4 py-2 rounded-lg text-sm"><Pencil className="w-4 h-4" /></button>
+              <button onClick={() => onDelete(p.id)} className="bg-red-600 px-4 py-2 rounded-lg text-sm"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -309,19 +338,37 @@ function AnalyticsPanel({ data }: any) {
   return (
     <div>
       <h1 className="text-4xl font-black mb-8 text-white">ანალიტიკა</h1>
-      <div className="grid grid-cols-3 gap-6 mb-12">
-        <div className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800"><p className="text-zinc-500 font-bold">ნახვები</p><p className="text-4xl font-black text-white">{data.length}</p></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
+          <div className="flex items-center gap-4 mb-6">
+            <Eye className="w-8 h-8 text-blue-500" />
+            <div>
+              <p className="text-zinc-400 text-sm">ჯამი ნახვები</p>
+              <p className="text-4xl font-black">{data.reduce((sum: number, d: any) => sum + (d.views || 0), 0)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
+          <div className="flex items-center gap-4 mb-6">
+            <TrendingUp className="w-8 h-8 text-green-500" />
+            <div>
+              <p className="text-zinc-400 text-sm">ჯამი ვიზიტორი</p>
+              <p className="text-4xl font-black">{data.reduce((sum: number, d: any) => sum + (d.visitors || 0), 0)}</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  )
-}
-
-function ProductCard({ product, onEdit, onDelete }: any) {
-  return (
-    <div className="bg-zinc-900 p-4 rounded-xl flex items-center gap-4 border border-zinc-800 group">
-      <img src={product.img} className="w-16 h-16 object-cover rounded-lg" />
-      <div className="flex-1"><h3 className="font-bold text-white">{product.name}</h3><p className="text-red-500 text-sm">{product.price}</p></div>
-      <div className="flex gap-2 opacity-0 group-hover:opacity-100"><button onClick={() => onEdit(product)} className="text-blue-500"><Pencil /></button><button onClick={() => onDelete(product.id)} className="text-red-500"><Trash2 /></button></div>
+      <div className="mt-8 bg-zinc-900 p-8 rounded-3xl border border-zinc-800">
+        <h2 className="text-2xl font-bold mb-6">დეტალი</h2>
+        <div className="space-y-3">
+          {data.map((d: any) => (
+            <div key={d.id} className="flex justify-between p-4 bg-zinc-800 rounded-lg">
+              <span>{d.page}</span>
+              <span className="text-zinc-400">{d.views} views • {d.visitors} visitors</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
