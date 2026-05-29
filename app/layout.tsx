@@ -45,10 +45,6 @@ export default function RootLayout({
         {children}
         <AdminFloatButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
-          {/* DNS Exit Verification for FreeDomain.one */}
-        <a href="http://dnsexit.com" target="_blank" rel="noopener noreferrer">
-          <img src="http://dnsexit.com/images/dns.gif" border="0" alt="DNS Powered by DNSExit.com" />
-        </a>
       </body>
     </html>
   )
