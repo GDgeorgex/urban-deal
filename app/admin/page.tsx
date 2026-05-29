@@ -309,14 +309,16 @@ function CulturePanel({ posts, onSave, onDelete }: any) {
     <div>
       <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">კულტურა</h1><button onClick={() => setEditing({})} className="bg-purple-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი პოსტი</button></div>
       {editing && (
-        <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
-          <input placeholder="სათაური" defaultValue={editing.title} onChange={e => setEditing({...editing, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
-          <textarea placeholder="ტექსტი" defaultValue={editing.content} onChange={e => setEditing({...editing, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-32 mb-4" />
-          <div className="flex gap-4">
-            <button onClick={() => { onSave(editing); setEditing(null) }} className="bg-purple-600 px-6 py-2 rounded-xl font-bold">შენახვა</button>
-            <button onClick={() => setEditing(null)} className="bg-zinc-800 px-6 py-2 rounded-xl font-bold">გაუქმება</button>
-          </div>
-        </div>
+  <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
+    <input placeholder="სათაური" defaultValue={editing.title} onChange={e => setEditing({...editing, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
+    <textarea placeholder="აღწერა (Description)" defaultValue={editing.description} onChange={e => setEditing({...editing, description: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-20 mb-4" />
+    <textarea placeholder="ტექსტი (Content)" defaultValue={editing.content} onChange={e => setEditing({...editing, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-32 mb-4" />
+    <input placeholder="სურათის URL (Image URL)" defaultValue={editing.image_url} onChange={e => setEditing({...editing, image_url: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
+    <div className="flex gap-4">
+      <button onClick={() => { onSave(editing); setEditing(null) }} className="bg-purple-600 px-6 py-2 rounded-xl font-bold">შენახვა</button>
+      <button onClick={() => setEditing(null)} className="bg-zinc-800 px-6 py-2 rounded-xl font-bold">გაუქმება</button>
+    </div>
+  </div>
       )}
       <div className="space-y-4">
         {posts.map((p: any) => (
