@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 
-export function Navbar() {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
