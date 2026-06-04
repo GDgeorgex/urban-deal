@@ -169,6 +169,7 @@ function CmsPanel({ content, onSave }: any) {
 function CmsItem({ item, onSave }: any) {
   const [val, setVal] = useState(item.value)
   const [uploading, setUploading] = useState(false)
+  const [hasChanged, setHasChanged] = useState(false)
 
   const handleUpload = async (e: any) => {
     const file = e.target.files[0]
@@ -179,27 +180,37 @@ function CmsItem({ item, onSave }: any) {
     if (!error) {
       const { data } = supabase.storage.from("product-images").getPublicUrl(fileName)
       setVal(data.publicUrl)
-      onSave({ ...item, value: data.publicUrl })
+      setHasChanged(true)
     }
     setUploading(false)
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold text-zinc-500 uppercase">{item.label}</label>
-      <div className="flex gap-4">
+      <div className="flex justify-between items-center">
+        <label className="text-xs font-bold text-zinc-500 uppercase">{item.label}</label>
+        {hasChanged && <span className="text-[10px] bg-orange-600/20 text-orange-500 px-2 py-1 rounded-full font-bold">შეცვლილია - შეინახეთ</span>}
+      </div>
+      <div className="flex gap-4 items-center">
         {item.content_type === 'text' ? (
-          <input value={val} onChange={e => setVal(e.target.value)} onBlur={() => onSave({ ...item, value: val })} className="flex-1 bg-zinc-800 p-4 rounded-xl border border-zinc-700 outline-none focus:border-red-600 text-white" />
+          <input value={val} onChange={e => { setVal(e.target.value); setHasChanged(true); }} className="flex-1 bg-zinc-800 p-4 rounded-xl border border-zinc-700 outline-none focus:border-red-600 text-white" />
         ) : (
           <div className="flex-1 flex gap-4 items-center">
             <img src={val} className="w-20 h-20 object-cover rounded-xl border border-zinc-700" />
-            <input value={val} onChange={e => setVal(e.target.value)} onBlur={() => onSave({ ...item, value: val })} className="flex-1 bg-zinc-800 p-4 rounded-xl border border-zinc-700 outline-none focus:border-red-600 text-white" />
+            <input value={val} onChange={e => { setVal(e.target.value); setHasChanged(true); }} className="flex-1 bg-zinc-800 p-4 rounded-xl border border-zinc-700 outline-none focus:border-red-600 text-white" />
             <label className="bg-zinc-700 px-4 py-4 rounded-xl cursor-pointer hover:bg-zinc-600">
               {uploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
               <input type="file" className="hidden" onChange={handleUpload} />
             </label>
           </div>
         )}
+        <button
+          onClick={() => { onSave({ ...item, value: val }); setHasChanged(false); }}
+          disabled={!hasChanged}
+          className={`p-4 rounded-xl transition flex items-center gap-2 font-bold ${hasChanged ? "bg-green-600 hover:bg-green-700 text-white" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+        >
+          <Save className="w-5 h-5" /> {hasChanged ? "შენახვა" : "შენახულია"}
+        </button>
       </div>
     </div>
   )
@@ -325,36 +336,8 @@ function CulturePanel({ posts, onSave, onDelete }: any) {
   return (
     <div>
       <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">კულტურა</h1><button onClick={() => setEditing({})} className="bg-purple-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი პოსტი</button></div>
- {editing && (
-  <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
-    <input placeholder="სათაური" defaultValue={editing.title} onChange={e => setEditing({...editing, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
-    <textarea placeholder="აღწერა (Description)" defaultValue={editing.description} onChange={e => setEditing({...editing, description: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-20 mb-4" />
-    <textarea placeholder="ტექსტი (Content)" defaultValue={editing.content} onChange={e => setEditing({...editing, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-32 mb-4" />
-    
-    {/* Image Upload Section */}
-    <div className="mb-4">
-      <label className="text-xs font-bold text-zinc-500 uppercase mb-2 block">სურათი (Image)</label>
-      <div className="flex gap-4 items-center">
-        {editing.image_url && (
-          <div className="relative">
-            <img src={editing.image_url} className="w-24 h-24 object-cover rounded-xl border border-zinc-700" />
-            <button onClick={() => setEditing({...editing, image_url: ''})} className="absolute top-1 right-1 bg-red-600 p-1 rounded-lg"><Trash2 className="w-3 h-3" /></button>
-          </div>
-        )}
-        <label className="bg-zinc-700 px-6 py-6 rounded-xl cursor-pointer hover:bg-zinc-600 flex items-center gap-2">
-          {editing.uploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
-          <span className="text-sm">აირჩიე სურათი</span>
-          <input type="file" className="hidden" onChange={(e) => handleCultureImageUpload(e, editing, setEditing)} />
-        </label>
-      </div>
-    </div>
-    
-    <div className="flex gap-4">
-      <button onClick={() => { onSave(editing); setEditing(null) }} className="bg-purple-600 px-6 py-2 rounded-xl font-bold">შენახვა</button>
-      <button onClick={() => setEditing(null)} className="bg-zinc-800 px-6 py-2 rounded-xl font-bold">გაუქმება</button>
-    </div>
-  </div>
-)}
+  {editing && <CultureForm post={editing} onSave={(p: any) => { onSave(p); setEditing(null); }} onCancel={() => setEditing(null)} />}
+
       <div className="space-y-4">
         {posts.map((p: any) => (
           <div key={p.id} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
@@ -366,6 +349,54 @@ function CulturePanel({ posts, onSave, onDelete }: any) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+function CultureForm({ post, onSave, onCancel }: any) {
+  const [form, setForm] = useState(post || {})
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = async (e: any) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    const fileName = `cult-${Date.now()}-${file.name}`
+    const { error } = await supabase.storage.from("product-images").upload(fileName, file)
+    if (!error) {
+      const { data } = supabase.storage.from("product-images").getPublicUrl(fileName)
+      setForm({ ...form, image_url: data.publicUrl })
+    }
+    setUploading(false)
+  }
+
+  return (
+    <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
+      <h2 className="text-2xl font-bold mb-8 text-red-500">{form.id ? "პოსტის რედაქტირება" : "ახალი პოსტი"}</h2>
+      <input placeholder="სათაური" value={form.title || ""} onChange={e => setForm({...form, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 text-white border border-zinc-700 focus:border-red-600 outline-none" />
+      <textarea placeholder="მოკლე აღწერა" value={form.description || ""} onChange={e => setForm({...form, description: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 h-20 text-white border border-zinc-700 focus:border-red-600 outline-none" />
+      <textarea placeholder="შინაარსი" value={form.content || ""} onChange={e => setForm({...form, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl mb-4 h-40 text-white border border-zinc-700 focus:border-red-600 outline-none" />
+      <div className="flex items-center gap-6 mb-8 p-6 bg-zinc-800/50 rounded-2xl border border-zinc-800">
+        <div className="relative">
+          {form.image_url && (
+            <>
+              <img src={form.image_url} className="w-32 h-32 object-cover rounded-xl bg-black border border-zinc-700" />
+              <button onClick={() => setForm({...form, image_url: ""})} className="absolute -top-2 -right-2 bg-red-600 p-2 rounded-full"><Trash2 className="w-4 h-4" /></button>
+            </>
+          )}
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-bold text-zinc-500 uppercase mb-3">სურათის ატვირთვა</p>
+          <label className="bg-zinc-700 px-6 py-4 rounded-xl cursor-pointer hover:bg-zinc-600 transition flex items-center gap-3 font-bold w-fit">
+            {uploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+            {uploading ? "იტვირთება..." : "აირჩიე PC-დან"}
+            <input type="file" className="hidden" onChange={handleUpload} />
+          </label>
+        </div>
+      </div>
+      <div className="flex gap-4">
+        <button onClick={() => onSave(form)} className="bg-red-600 px-10 py-4 rounded-xl font-bold text-white">შენახვა</button>
+        <button onClick={onCancel} className="bg-zinc-800 px-10 py-4 rounded-xl font-bold text-white">გაუქმება</button>
       </div>
     </div>
   )
