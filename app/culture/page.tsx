@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { supabase } from "@/lib/supabase"
@@ -14,14 +15,12 @@ export default function CulturePage() {
   const [showMore, setShowMore] = useState(false)
 
   useEffect(() => {
-    // Fetch CMS content for hero/manifesto
     async function fetchCms() {
       const { data } = await supabase.from('site_content').select('*')
       if (data) setCms(data)
     }
     fetchCms()
 
-    // Fetch culture posts (sorted by date, newest first)
     async function fetchPosts() {
       const { data } = await supabase
         .from('culture_posts')
@@ -30,13 +29,11 @@ export default function CulturePage() {
       
       if (data) {
         setAllPosts(data)
-        // Show first 4 posts by default
         setDisplayedPosts(data.slice(0, 4))
       }
     }
     fetchPosts()
 
-    // Subscribe to real-time updates
     const subscription = supabase
       .channel('culture_posts')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'culture_posts' }, () => {
@@ -58,7 +55,7 @@ export default function CulturePage() {
   const titleUrban = getContent('culture_hero_title_urban', 'URBAN')
   const titleCulture = getContent('culture_hero_title_culture', 'CULTURE')
   const heroDesc = getContent('culture_hero_description', 'სნიკერი — ეს არ არის უბრალო ფეხსაცმელი. ეს შენი სტილია, შენი ვიბი, შენი ნაბიჯი.')
-  const heroBg = getContent('culture_hero_bg', 'https://images.unsplash.com/photo-1556906781-9a414e2a9c86?w=1600&q=80' )
+  const heroBg = getContent('culture_hero_bg', 'https://images.unsplash.com/photo-1556906781-9a414e2a9c86?w=1600&q=80')
 
   const m1 = getContent('culture_manifesto_title_part1', 'ვართ ჩვენ, ვართ')
   const m2 = getContent('culture_manifesto_title_part2', 'Urban Deal')
@@ -89,22 +86,24 @@ export default function CulturePage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-16">
                   {displayedPosts.map((post) => (
-                    <div key={post.id} className="relative overflow-hidden rounded-[14px] cursor-pointer group">
-                      <Image 
-                        src={post.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80'} 
-                        alt={post.title} 
-                        width={800} 
-                        height={320} 
-                        className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-105" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-                        <div>
-                          <h3 className="font-black text-[22px] mb-1">{post.title}</h3>
-                          <p className="text-[13px] text-white/70 line-clamp-2">{post.description || post.content}</p>
+                    <Link key={post.id} href={`/culture/${post.id}`}>
+                      <div className="relative overflow-hidden rounded-[14px] cursor-pointer group">
+                        <Image 
+                          src={post.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80'} 
+                          alt={post.title} 
+                          width={800} 
+                          height={320} 
+                          className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-105" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
+                          <div>
+                            <h3 className="font-black text-[22px] mb-1">{post.title}</h3>
+                            <p className="text-[13px] text-white/70 line-clamp-2">{post.description || post.content}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                   ))}
+                    </Link>
+                  ))}
                 </div>
 
                 {/* See More Button */}
@@ -124,22 +123,24 @@ export default function CulturePage() {
                 {displayedPosts.length > 4 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-16">
                     {displayedPosts.slice(4).map((post) => (
-                      <div key={post.id} className="relative overflow-hidden rounded-[14px] cursor-pointer group">
-                        <Image 
-                          src={post.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80'} 
-                          alt={post.title} 
-                          width={800} 
-                          height={320} 
-                          className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-105" 
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-                          <div>
-                            <h3 className="font-black text-[22px] mb-1">{post.title}</h3>
-                            <p className="text-[13px] text-white/70 line-clamp-2">{post.description || post.content}</p>
+                      <Link key={post.id} href={`/culture/${post.id}`}>
+                        <div className="relative overflow-hidden rounded-[14px] cursor-pointer group">
+                          <Image 
+                            src={post.image_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80'} 
+                            alt={post.title} 
+                            width={800} 
+                            height={320} 
+                            className="w-full h-[320px] object-cover transition-transform duration-500 group-hover:scale-105" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
+                            <div>
+                              <h3 className="font-black text-[22px] mb-1">{post.title}</h3>
+                              <p className="text-[13px] text-white/70 line-clamp-2">{post.description || post.content}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                     ))}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </>
