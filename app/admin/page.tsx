@@ -87,6 +87,23 @@ export default function AdminPage() {
       </div>
     )
   }
+  
+  const handleCultureImageUpload = async (e: any, editing: any, setEditing: any) => {
+    const file = e.target.files[0]
+    if (!file) return
+    
+    setEditing({...editing, uploading: true})
+    const fileName = `culture-${Date.now()}-${file.name}`
+    const { error } = await supabase.storage.from("product-images").upload(fileName, file)
+    
+    if (!error) {
+      const { data } = supabase.storage.from("product-images").getPublicUrl(fileName)
+      setEditing({...editing, image_url: data.publicUrl, uploading: false})
+    } else {
+      alert("შეცდომა: " + error.message)
+      setEditing({...editing, uploading: false})
+    }
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
