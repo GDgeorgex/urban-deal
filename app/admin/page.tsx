@@ -7,7 +7,7 @@ import {
   Users, Eye, TrendingUp, Layout
 } from "lucide-react"
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "udeal2025"
+const ADMIN_PASSWORD = "udeal2025"
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
