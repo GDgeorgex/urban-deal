@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Montserrat, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AdminFloatButton } from '@/components/admin-float-button'
+import { AnalyticsTracker } from '@/components/analytics-tracker'
 import './globals.css'
 
 const montserrat = Montserrat({ 
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="ka" className={`${montserrat.variable} ${inter.variable} bg-background`}>
       <body className="font-sans antialiased overflow-x-hidden">
+        <AnalyticsTracker />
         {children}
         <AdminFloatButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
