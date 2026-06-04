@@ -308,18 +308,36 @@ function CulturePanel({ posts, onSave, onDelete }: any) {
   return (
     <div>
       <div className="flex justify-between mb-8"><h1 className="text-4xl font-black text-white">კულტურა</h1><button onClick={() => setEditing({})} className="bg-purple-600 px-6 py-3 rounded-xl font-bold text-white">+ ახალი პოსტი</button></div>
-      {editing && (
+ {editing && (
   <div className="bg-zinc-900 p-8 rounded-3xl mb-10 border border-zinc-800">
     <input placeholder="სათაური" defaultValue={editing.title} onChange={e => setEditing({...editing, title: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
     <textarea placeholder="აღწერა (Description)" defaultValue={editing.description} onChange={e => setEditing({...editing, description: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-20 mb-4" />
     <textarea placeholder="ტექსტი (Content)" defaultValue={editing.content} onChange={e => setEditing({...editing, content: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white h-32 mb-4" />
-    <input placeholder="სურათის URL (Image URL)" defaultValue={editing.image_url} onChange={e => setEditing({...editing, image_url: e.target.value})} className="w-full bg-zinc-800 p-4 rounded-xl border border-zinc-700 text-white mb-4" />
+    
+    {/* Image Upload Section */}
+    <div className="mb-4">
+      <label className="text-xs font-bold text-zinc-500 uppercase mb-2 block">სურათი (Image)</label>
+      <div className="flex gap-4 items-center">
+        {editing.image_url && (
+          <div className="relative">
+            <img src={editing.image_url} className="w-24 h-24 object-cover rounded-xl border border-zinc-700" />
+            <button onClick={() => setEditing({...editing, image_url: ''})} className="absolute top-1 right-1 bg-red-600 p-1 rounded-lg"><Trash2 className="w-3 h-3" /></button>
+          </div>
+        )}
+        <label className="bg-zinc-700 px-6 py-6 rounded-xl cursor-pointer hover:bg-zinc-600 flex items-center gap-2">
+          {editing.uploading ? <Loader2 className="animate-spin" /> : <UploadCloud />}
+          <span className="text-sm">აირჩიე სურათი</span>
+          <input type="file" className="hidden" onChange={(e) => handleCultureImageUpload(e, editing, setEditing)} />
+        </label>
+      </div>
+    </div>
+    
     <div className="flex gap-4">
       <button onClick={() => { onSave(editing); setEditing(null) }} className="bg-purple-600 px-6 py-2 rounded-xl font-bold">შენახვა</button>
       <button onClick={() => setEditing(null)} className="bg-zinc-800 px-6 py-2 rounded-xl font-bold">გაუქმება</button>
     </div>
   </div>
-      )}
+)}
       <div className="space-y-4">
         {posts.map((p: any) => (
           <div key={p.id} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
